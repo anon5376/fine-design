@@ -1,0 +1,14 @@
+node_modules
+.next
+out
+test-results
+playwright-report
+next-env.d.ts
+*.tsbuildinfo
+.DS_Store
+.snippets
+screenshots
+fine-site.zip
+registry.json
+public/r/
+public/llms.txt

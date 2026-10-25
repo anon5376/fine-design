@@ -1,0 +1,28 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "docs-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
+      "port": 4318
+    },
+    {
+      "name": "docs-static",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "4319",
+        "--bind",
+        "127.0.0.1",
+        "--directory",
+        "out"
+      ],
+      "port": 4319
+    }
+  ]
+}

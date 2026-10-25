@@ -1,0 +1,13 @@
+{
+  "name": "fine-design",
+  "version": "0.1.0",
+  "description": "Build UI with Fine, a React design system on Base UI, Tailwind v4 and Motion. A skill with the design rules, plus the shadcn MCP server to search, view and add Fine components.",
+  "author": {
+    "name": "anon5376",
+    "url": "https://github.com/anon5376"
+  },
+  "homepage": "https://fine-design.qeqx.chatgpt.site",
+  "repository": "https://github.com/anon5376/fine-design",
+  "license": "MIT",
+  "keywords": ["design-system", "react", "tailwind", "shadcn", "base-ui", "motion", "registry"]
+}

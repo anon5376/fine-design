@@ -1,0 +1,15 @@
+{
+  "name": "fine-design",
+  "description": "Fine: a React design system (Base UI, Tailwind v4, Motion) as a shadcn registry, with an agent skill.",
+  "owner": {
+    "name": "anon5376",
+    "url": "https://github.com/anon5376"
+  },
+  "plugins": [
+    {
+      "name": "fine-design",
+      "source": "./plugin",
+      "description": "Build UI with Fine: installs components from its shadcn registry through the shadcn MCP server and applies its design rules."
+    }
+  ]
+}
