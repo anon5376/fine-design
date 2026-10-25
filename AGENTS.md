@@ -155,5 +155,6 @@ Ink chrome (primary, focus ring), grey secondary, cobalt accent on a screen's ma
 | `npm run verify:install` | Registry items install into a fresh Next app and render with fine's tokens and motion; needs network and a prior build (temp app path is printed); after a deploy built with `REGISTRY_URL=https://…`, it installs from the live registry instead |
 | `node scripts/screenshots.mts [states]` | Pages at 375 and 1440, light and dark, for a visual look |
 | `node scripts/motion-tour.mts` | Motion video tour (needs ffmpeg) |
+| `node scripts/showcase-video.mts` | Promo reel of `/showcase` (unlisted payments app), 1920x1080 at 60fps → `screenshots/x/` (build first; needs ffmpeg) |
 
 A registry change is proven by `npm run verify:install` (fresh Next app, `shadcn init`, `add --overwrite`, build, browser checks) plus a look at `screenshots/install/`; the registry JSON alone proves nothing. Specs wait on `html[data-hydrated]`; a new interactive page keeps that signal.

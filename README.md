@@ -73,6 +73,7 @@ npm run verify           # build → typecheck → snippets → Playwright
 npm run verify:install   # install select + dialog into a fresh Next app and check it; needs network and a prior build
 node scripts/screenshots.mts [states]   # every page at 375/1440, light/dark → screenshots/
 node scripts/motion-tour.mts            # motion video tour → screenshots/motion/ (needs ffmpeg)
+node scripts/showcase-video.mts        # 1080p60 promo reel of /showcase → screenshots/x/ (needs ffmpeg)
 ```
 
 ## Theming

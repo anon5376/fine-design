@@ -34,7 +34,7 @@ async function scan(page: Page) {
   expect(found).toEqual([])
 }
 
-const paths = ["/", "/tokens/", ...["components", "blocks"].flatMap(d => readdirSync(`out/${d}`).map(slug => `/${d}/${slug}/`))]
+const paths = ["/", "/tokens/", "/showcase/", ...["components", "blocks"].flatMap(d => readdirSync(`out/${d}`).map(slug => `/${d}/${slug}/`))]
 
 for (const scheme of ["light", "dark"] as const) {
   test.describe(scheme, () => {
