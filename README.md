@@ -74,6 +74,7 @@ npm run verify:install   # install select + dialog into a fresh Next app and che
 node scripts/screenshots.mts [states]   # every page at 375/1440, light/dark → screenshots/
 node scripts/motion-tour.mts            # motion video tour → screenshots/motion/ (needs ffmpeg)
 node scripts/showcase-video.mts        # 1080p60 promo reel of /showcase → screenshots/x/ (needs ffmpeg)
+node scripts/render-film.mts           # deterministic launch film of /film (virtual clock, 1080p60) → screenshots/x/fine-film.mp4; --from/--to/--stills for partials (build first; needs ffmpeg)
 ```
 
 ## Theming
