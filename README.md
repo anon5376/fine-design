@@ -7,6 +7,8 @@
   ╚═╝     ╚═╝╚═╝  ╚═══╝╚══════╝
 ```
 
+![The first ten seconds of Fine's launch film: the wordmark, an install command typed out, buttons, a wall of components, counters for components and blocks, and a balance whose digits roll](docs/demo.gif)
+
 React design system: Base UI primitives, Tailwind CSS v4 tokens, Motion springs, distributed as a shadcn registry.
 
 Live site: https://fine-design.qeqx.chatgpt.site
@@ -66,7 +68,7 @@ npx shadcn@latest add https://fine-design.qeqx.chatgpt.site/r/button.json
 
 ```bash
 npm install
-npm run dev              # docs on http://localhost:4318
+npm run dev              # docs on port 4318
 npm run tokens           # regenerate CSS, JSON, motion for every preset; exits 1 on a contrast, accent/danger hue or gamut failure
 npm run registry:build   # registry.json + public/llms.txt, then shadcn build → public/r/*.json (58 items)
 npm run build            # tokens → registry:build → static site in out/
@@ -92,6 +94,10 @@ node scripts/render-film.mts           # deterministic launch film of /film (vir
  │ styling                                │      │                                                         │
  └────────────────────────────────────────┘      └─────────────────────────────────────────────────────────┘
 ```
+
+![One payments dashboard in three presets, light mode: Ledger with a cobalt figure, Folio with serif type and an aubergine figure, Poster with heavy outlines, hard shadows and a magenta figure](docs/themes.png)
+
+Ledger, Folio and Poster, left to right: the same components on the same page, only the preset differs.
 
 | Preset | Direction | Take it for |
 |---|---|---|
