@@ -27,7 +27,7 @@ export default async function ComponentPage({ params }: Props) {
   return (
     <article className="grid grid-cols-1 gap-10">
       <header className="grid grid-cols-1 gap-4">
-        <h1 className="text-2xl font-medium tracking-tight">{entry.title}</h1>
+        <h1 className="font-display text-2xl font-title tracking-tight">{entry.title}</h1>
         <InstallCommand name={slug} />
       </header>
       {parseExamples(source).map(ex => {

@@ -9,11 +9,12 @@ const ORIGIN = (process.env.REGISTRY_URL ?? "http://localhost:4319").replace(/\/
 const read = path => readFileSync(new URL(`../${path}`, import.meta.url), "utf8")
 const pkg = JSON.parse(read("package.json"))
 
-const THEME = "fine-theme"
+const BASE = "fine-base"
+const ALIAS = "fine-theme"
 const registryUrl = name => `${ORIGIN}/r/${name}.json`
 
 // Per item: category and a one-line description. A file without an entry fails the build, so none is forgotten.
-const CATEGORIES = ["foundations", "inputs", "display", "feedback", "overlays", "navigation", "blocks", "lib", "theme"]
+const CATEGORIES = ["base", "foundations", "inputs", "display", "feedback", "overlays", "navigation", "blocks", "lib", "theme"]
 const UI = {
   text: ["foundations", "Body text with size and tone variants."],
   heading: ["foundations", "Section heading: level sets the tag, size sets the look."],
@@ -32,7 +33,7 @@ const UI = {
   switch: ["inputs", "On and off toggle."],
   slider: ["inputs", "Value slider for one thumb or a range."],
   label: ["inputs", "Form label."],
-  field: ["inputs", "Form, Field, label and error wired to Base UI validation."],
+  field: ["inputs", "Form, Field, label, hint and error wired to Base UI validation."],
   card: ["display", "Surface with header, title, content and footer."],
   badge: ["display", "Compact status label in neutral and status tones."],
   avatar: ["display", "User image with an initials fallback."],
@@ -59,13 +60,13 @@ const UI = {
   sidebar: ["navigation", "Vertical navigation with groups of link rows and a gliding hover highlight."],
 }
 const BLOCKS = {
-  "auth-form": "Sign-in form with validation and an onSubmit handler.",
-  hero: "Headline, two actions and a stack of ledger slips that settles in.",
-  "feature-grid": "Heading and a grid of six icon features.",
-  pricing: "Three plans with a monthly and yearly toggle and one recommended.",
-  faq: "Accordion of questions with the first answer open.",
-  footer: "Footer with four link columns.",
-  "dashboard-shell": "App frame with sidebar, header and a paged table; fills its container.",
+  "auth-form": "Sign-in form with validation, an onSubmit handler, and slots for title, submit label and footer.",
+  hero: "Headline, description, actions and a media slot; the default media is a stack of ledger slips that settles in.",
+  "feature-grid": "Heading and a grid of icon features; both come from props, six by default.",
+  pricing: "Plans with a monthly and yearly toggle, one recommended; plans, labels, currency and billing come from props.",
+  faq: "Accordion of questions from props; the first answer is open by default.",
+  footer: "Footer with a brand, link columns and a legal line from props; four columns by default.",
+  "dashboard-shell": "App frame with sidebar, header and a content slot; nav, breadcrumb, account and page title come from props. Fills its container; the default content is a paged transfers table.",
 }
 const LIB = {
   utils: "cn: clsx plus tailwind-merge.",
@@ -206,7 +207,7 @@ function importsOf(src, self) {
   return { registryDependencies: [...registryDependencies].sort(), dependencies: [...dependencies].sort() }
 }
 
-function sourceItem({ name, type, path, title, description, category, docs, theme }) {
+function sourceItem({ name, type, path, title, description, category, docs }) {
   const src = read(path)
   const { registryDependencies, dependencies } = importsOf(src, name)
   const exported = exportsOf(src)
@@ -217,7 +218,7 @@ function sourceItem({ name, type, path, title, description, category, docs, them
     title,
     description,
     ...(dependencies.length && { dependencies }),
-    registryDependencies: [...(theme ? [registryUrl(THEME)] : []), ...registryDependencies],
+    registryDependencies: [registryUrl(BASE), ...registryDependencies],
     files: [{ path, type }],
     categories: [category],
     ...(docs && { docs }),
@@ -247,13 +248,13 @@ coverage("site/nav.ts blocks", blockFiles, navBlocks.map(e => e.slug))
 for (const [slug, [category, description]] of Object.entries(UI)) {
   items.push(sourceItem({
     name: slug, type: "registry:ui", path: `components/ui/${slug}.tsx`, title: titles[slug],
-    description, category, docs: `${ORIGIN}/components/${slug}/`, theme: true,
+    description, category, docs: `${ORIGIN}/components/${slug}/`,
   }))
 }
 for (const [slug, description] of Object.entries(BLOCKS)) {
   items.push(sourceItem({
     name: slug, type: "registry:block", path: `components/blocks/${slug}.tsx`, title: titles[slug],
-    description, category: "blocks", docs: `${ORIGIN}/blocks/${slug}/`, theme: true,
+    description, category: "blocks", docs: `${ORIGIN}/blocks/${slug}/`,
   }))
 }
 for (const file of libFiles) {
@@ -263,13 +264,23 @@ for (const file of libFiles) {
   }))
 }
 
-// ---------------------------------------------------------------- fine-theme
+// ---------------------------------------------------------------- fine-base and themes
 
-// styles/fine.css is the generated source of truth (scripts/tokens.mjs). It is split into what the shadcn CLI
-// writes into a consumer's globals.css: cssVars.theme -> `@theme inline`, everything else -> the css field.
-// Kept out on purpose: `--color-*: initial` (the consumer's Tailwind palette stays), spacing and breakpoints (Tailwind's own values).
-function themeItem() {
-  const root = postcss.parse(read("styles/fine.css"))
+// A look is split in two so installing a component never re-skins a project.
+//   fine-base   the machinery: @theme inline mappings, utilities, base layer, keyframes, motion scalars. Every ui, block
+//               and lib item depends on it. It also carries Ledger's value of every token, as defaults inside
+//               `@layer base`, so any :root rule in the project and any installed theme beats it wherever it sits in the file.
+//   theme-<n>   one preset's values and nothing else, on :root / .light / .dark / OS dark. Installed on purpose, once.
+//   fine-theme  alias of theme-ledger, so old install lines keep working.
+// styles/fine.css and styles/presets/<name>.css are generated (scripts/tokens.mjs); both items are cut from them here.
+// What the shadcn CLI does with the result: `cssVars.theme` -> `@theme inline`; the `css` field, key by key: a plain
+// selector merges into the first top-level rule with that exact selector (so a theme's `:root` lands in the project's own
+// :root), an at-rule is found or created and its rules merged (so the defaults join the project's own `@layer base`). Kept out on purpose:
+// `--color-*: initial` (the consumer's Tailwind palette stays), spacing and breakpoints (Tailwind's own values).
+// `primitives` names the palette variables to inline: the preset's own ramps (its tokens.json primitives), so a preset can
+// add one (plum, magenta) without this script knowing it.
+function parseCss(path, primitives) {
+  const root = postcss.parse(read(path))
   const prims = {}
   const theme = {}
   const css = {}
@@ -296,7 +307,7 @@ function themeItem() {
         theme[key] = d.value
       }
     } else if (n.type === "rule" && n.selector === ":root" && !Object.keys(prims).length) {
-      for (const d of n.nodes) if (/^(white|black|(gray|blue|red|green|amber)-\d+)$/.test(d.prop.slice(2))) prims[d.prop.slice(2)] = d.value
+      for (const d of n.nodes) if (primitives.includes(d.prop.slice(2))) prims[d.prop.slice(2)] = d.value
       put(css, ":root", toObject(n))
     } else if (n.type === "rule" || n.type === "atrule") {
       const rest = toObject({ nodes: [n] })
@@ -318,22 +329,97 @@ function themeItem() {
   for (const [key, value] of Object.entries(theme)) {
     theme[key] = value.replace(/var\(--([\w-]+)\)/g, (whole, name) => (name !== key && name in theme ? theme[name] : whole))
   }
-  const colors = Object.keys(theme).filter(k => k.startsWith("color-")).map(k => k.slice(6))
+  return { theme, css }
+}
 
-  const tokens = JSON.parse(read("styles/tokens.json"))
+const tokens = JSON.parse(read("styles/tokens.json"))
+const titleCase = s => s[0].toUpperCase() + s.slice(1)
+
+// Ledger's values as defaults: the light, .light, .dark and OS-dark rules move into `@layer base`. Unlayered rules beat
+// layered ones whatever their specificity or position, so the project's own :root and any installed theme win in every
+// mode. Inside the layer the usual specificity picks the mode (`:root:not(.light)` over `:root`), and the rules are
+// written in one block so their order cannot be broken by a theme's own @media block earlier in the file.
+const DARK_OS = "@media (prefers-color-scheme: dark)"
+function asDefaults(css) {
+  const { ":root": light, ".light": lightScope, ".dark": darkScope, [DARK_OS]: dark, "@layer base": base, ...rest } = css
+  return { ...rest, "@layer base": { ":root": light, ".light": lightScope, ".dark": darkScope, [DARK_OS]: dark, ...base } }
+}
+
+function baseItem() {
+  const { theme, css } = parseCss("styles/fine.css", Object.keys(tokens.primitives))
+  const colors = Object.keys(theme).filter(k => k.startsWith("color-")).map(k => k.slice(6))
   return {
-    name: THEME,
-    type: "registry:theme",
-    title: "Fine theme",
-    description: "Semantic color tokens for light and dark, motion scalars, type scale, radii, shadows and the figures and focus-ring utilities.",
+    name: BASE,
+    type: "registry:style",
+    title: "Fine base",
+    description: "The @theme inline mappings, the figures, focus-ring and border-line utilities, base layer, keyframes and motion scalars, with Ledger defaults for every token in a cascade layer, so your :root and any theme win.",
     cssVars: { theme },
+    css: asDefaults(css),
+    categories: ["base"],
+    docs: `${ORIGIN}/tokens/`,
+    meta: { colors, modes: ["light", "dark", "os"], motion: tokens.motion },
+  }
+}
+
+// Fonts a preset reads beyond the four contract variables, from var(--font-x, "Family") in its font stacks, with the
+// optional next/font `axes` or `weights` its fontOptions declare for that variable (needed to load the face as the docs do).
+const FONT_VARS = new Set(["--font-sans", "--font-mono", "--font-display", "--font-figure"])
+function fontsOf(preset, fonts, options = {}) {
+  const found = new Map()
+  for (const value of Object.values(fonts)) {
+    for (const m of value.matchAll(/var\((--[\w-]+)(?:,\s*"([^"]+)")?\)/g)) {
+      if (FONT_VARS.has(m[1])) continue
+      if (!m[2]) throw new Error(`preset ${preset}: ${m[1]} needs a quoted fallback family, as var(${m[1]}, "Family")`)
+      found.set(m[1], m[2])
+    }
+  }
+  return [...found].map(([variable, family]) => ({ variable, family, ...options[variable] }))
+}
+
+// The docs load every preset's fonts in site/presets.ts; a font the tokens read but that file never declares would silently fall back,
+// and a loader whose axes or weight differ from the preset's fontOptions would give installed projects a different face than the docs show.
+const loaders = new Map()
+for (const m of read("site/presets.ts").replace(/^\s*\/\/.*$/gm, "").matchAll(/\w+\(\{([^}]*)\}\)/g)) {
+  const variable = /variable:\s*"(--[\w-]+)"/.exec(m[1])?.[1]
+  if (!variable) continue
+  const list = key => new RegExp(`\\b${key}:\\s*\\[([^\\]]*)\\]`).exec(m[1])?.[1].match(/"([^"]+)"/g)?.map(v => v.slice(1, -1)) ?? []
+  loaders.set(variable, { axes: list("axes"), weight: list("weight") })
+}
+
+function themeItem(preset) {
+  const { css } = parseCss(`styles/presets/${preset}.css`, Object.keys(tokens.presets[preset].primitives))
+  const fonts = fontsOf(preset, tokens.presets[preset].fonts, tokens.presets[preset].fontOptions)
+  for (const f of fonts) {
+    const loader = loaders.get(f.variable)
+    if (!loader) throw new Error(`preset ${preset} reads ${f.variable} but site/presets.ts declares no loader with variable: "${f.variable}"`)
+    for (const [key, loaderKey] of [["axes", "axes"], ["weights", "weight"]]) {
+      const [want, have] = [(f[key] ?? []).join(), loader[loaderKey].join()]
+      if (want !== have) throw new Error(`preset ${preset}: ${f.variable} declares ${key} [${want}] but its loader in site/presets.ts passes ${loaderKey} [${have}]`)
+    }
+  }
+  return {
+    name: `theme-${preset}`,
+    type: "registry:theme",
+    title: `${titleCase(preset)} theme`,
+    description: `${titleCase(preset)} preset values: colors for light and dark, fonts, weights, radii, type scale, control sizes, padding, border width and shadows. Install one theme; components do not change it.`,
     css,
     categories: ["theme"],
     docs: `${ORIGIN}/tokens/`,
-    meta: { colors, modes: ["light", "dark", "os"], motion: tokens.motion, fonts: ["--font-geist-sans", "--font-geist-mono"] },
+    meta: { preset, modes: ["light", "dark", "os"], fonts },
   }
 }
-items.push(themeItem())
+
+const presetNames = readdirSync(new URL("../styles/presets/", import.meta.url)).filter(f => f.endsWith(".css")).map(f => f.slice(0, -4)).sort((a, b) => (a === "ledger" ? -1 : b === "ledger" ? 1 : a.localeCompare(b)))
+if (!presetNames.includes("ledger")) throw new Error("styles/presets/ledger.css is missing: fine-theme installs theme-ledger")
+items.push(baseItem(), ...presetNames.map(themeItem), {
+  name: ALIAS,
+  type: "registry:theme",
+  title: "Fine theme",
+  description: "Alias of theme-ledger, so earlier install lines keep working.",
+  registryDependencies: [registryUrl("theme-ledger")],
+  categories: ["theme"],
+  docs: `${ORIGIN}/tokens/`,
+})
 
 // ---------------------------------------------------------------- registry.json
 
@@ -362,19 +448,22 @@ const tiers = Object.entries(JSON.parse(read("styles/tokens.json")).motion)
 
 const llms = `# Fine
 
-> React design system on Base UI, Tailwind CSS v4 and Motion, installed one component at a time as a shadcn registry.
+> React design system on Base UI, Tailwind CSS v4 and Motion, installed one component at a time as a shadcn registry. Behavior is the same in every project; appearance is a preset (${presetNames.join(", ")}).
 
 ## Conventions
 
-- Install: \`npx shadcn@latest add ${ORIGIN}/r/<name>.json\`. Components, lib files, ${THEME} and npm packages come with it. The project needs React 19, Tailwind v4 and a components.json with the default aliases (\`@/components\`, \`@/components/ui\`, \`@/lib\`). After \`shadcn init\`, add \`--overwrite\` so fine's \`button\` and \`utils\` replace the ones init wrote.
-- Theme: every component depends on \`${THEME}\`. It writes semantic color tokens to \`:root\` and \`.dark\`, the \`@theme inline\` mappings, the \`figures\` and \`focus-ring\` utilities and the motion scalars into globals.css. It leaves Tailwind's own palette alone, and adding any item re-applies its values to the first \`:root\` and \`.dark\` rule, so keep overrides in a later rule. Load Geist as \`--font-geist-sans\` and \`--font-geist-mono\` (next/font).
-- Tokens: style with semantic utilities only: bg-background, bg-surface, text-foreground, text-muted-foreground, border-border, border-input, bg-primary, bg-secondary, status colors success, warning, danger, info (each with -foreground and -subtle). \`accent\` (cobalt) marks a screen's main data element, never chrome. Radii: \`rounded-control\`, \`rounded-container\`. Money, counts, IDs and addresses take \`figures\`.
+- Direction: before a new site, page or screen, read the project's design doc or settle audience, content, typography, palette, composition, imagery and interaction character, then pick the closest preset (Ledger for dense data and operations tools) or derive one in scripts/presets/<name>.mjs. A small edit inside an existing screen follows that screen.
+- Install: install one theme first, then components: \`npx shadcn@latest add ${ORIGIN}/r/theme-ledger.json\`, then \`npx shadcn@latest add ${ORIGIN}/r/<name>.json\`. Components, lib files, ${BASE} and npm packages come with it. The project needs React 19, Tailwind v4 and a components.json with the default aliases (\`@/components\`, \`@/components/ui\`, \`@/lib\`). After \`shadcn init\`, add \`--overwrite\` so fine's \`button\` and \`utils\` replace the ones init wrote.
+- Base and theme: every component depends on \`${BASE}\`, never on a theme. It writes the \`@theme inline\` mappings, the \`figures\`, \`focus-ring\` and \`border-line\` utilities, the base layer, keyframes and motion scalars into globals.css, and Ledger's value for every token as a default in a cascade layer (\`@layer base\`), so a \`:root\` rule in your project or an installed theme always wins. Adding a component therefore never changes your look. The look comes from one theme, installed once on purpose: ${presetNames.map(n => "`theme-" + n + "`").join(", ")}; \`${ALIAS}\` is an alias of \`theme-ledger\`. A theme writes colors, fonts, weights, radii, type scale, control sizes, padding, border width and shadows to \`:root\`, \`.light\`, \`.dark\` and the OS dark query; installing another replaces them, and overrides belong in a later rule. It leaves Tailwind's own palette alone. Load the fonts listed in the theme item's \`meta.fonts\` (next/font, one CSS variable each, passing an entry's \`axes\` or \`weights\` when it lists them: Newsreader and Bricolage Grotesque need their opsz axis); Ledger needs Geist as \`--font-geist-sans\` and \`--font-geist-mono\`.
+- Tokens: style with semantic utilities only: bg-background, bg-surface, text-foreground, text-muted-foreground, border-border, border-input, bg-primary, bg-secondary, status colors success, warning, danger, info (each with -foreground and -subtle). \`accent\` marks emphasis on data; how many a screen carries is the preset's call (Ledger: one, never chrome). A preset's accent, and its primary when chromatic, sits 40 degrees or more from danger's hue, so it never reads as an error (the token build enforces it: Ledger cobalt, Folio aubergine, Poster magenta). Preset utilities: \`rounded-control|container|small|pill\`, \`font-label|title|strong|display\`, \`h-control-sm|md|lg\`, \`px-pad-control-*|field-*\`, \`p-pad-container-*\`, \`border-line\`, \`shadow-raised|control|overlay\`; they follow the installed theme. Money, counts, IDs and addresses take \`figures\`.
 - Dark mode: \`.dark\` or \`.light\` on \`<html>\` or any subtree; with neither, the OS setting decides. The \`dark:\` variant follows the same rule.
 - Variants: components take \`variant\` and \`size\` props (cva). Each exported \`<name>Variants()\` styles other elements, e.g. \`<a className={buttonVariants({ variant: "outline" })}>\`. \`render\` swaps the rendered element. Each registry item lists its exports and variants in \`meta\`. Merge classes with \`cn\` from \`@/lib/utils\`.
 - Motion: tiers ${tiers}. Fast: hover, focus, tooltips. Moderate: popups, drawers, indicators. Slow: dialogs, command palette. Expressive: toasts, the one overshoot. Enter on \`spring.<tier>\` from \`@/lib/motion\`, exit on its tween; CSS uses \`duration-(--duration-<tier>)\` with \`ease-spring-<tier>\`. Wrap the app in \`<MotionConfig reducedMotion="user">\`; reduced motion drops travel and keeps fades.
-- Accessibility: Base UI supplies roles, keyboard handling and focus management. The focus ring is a 2px ink outline (\`focus-visible:focus-ring\`), input borders keep 3:1 contrast, and every text pair passes WCAG AA at token build. Icon-only controls take a \`label\`.
+- Accessibility: Base UI supplies roles, keyboard handling and focus management. The focus ring is a 2px outline in the ring color (\`focus-visible:focus-ring\`), input borders keep 3:1 contrast, and every text pair in every preset passes WCAG AA at token build. Icon-only controls take a \`label\`.
+- Forms: a field with a rule or format shows a hint with \`FieldDescription\` inside \`Field\`; Base UI links it to the input through aria-describedby. Ledger has no taglines or secondary labels; other presets follow their direction.
 - Mount \`<Toaster />\` once for toast. \`TooltipProvider\` is optional: it lets the next tooltip in a toolbar open at once.
 
+${section("Base", "base")}
 ${section("Theme", "theme")}
 ${section("Foundations", "foundations")}
 ${section("Inputs", "inputs")}
@@ -386,4 +475,4 @@ ${section("Blocks", "blocks")}
 ${section("Lib", "lib")}`
 
 writeFileSync(new URL("../public/llms.txt", import.meta.url), llms.replace(/\n{3,}/g, "\n\n").trimEnd() + "\n")
-console.log(`registry.json: ${items.length} items (${items.filter(i => i.type === "registry:ui").length} ui, ${items.filter(i => i.type === "registry:block").length} blocks, ${items.filter(i => i.type === "registry:lib").length} lib, 1 theme), public/llms.txt`)
+console.log(`registry.json: ${items.length} items (${items.filter(i => i.type === "registry:ui").length} ui, ${items.filter(i => i.type === "registry:block").length} blocks, ${items.filter(i => i.type === "registry:lib").length} lib, 1 base, ${items.filter(i => i.categories[0] === "theme").length} theme), public/llms.txt`)

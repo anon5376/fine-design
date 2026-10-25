@@ -11,7 +11,7 @@ function Textarea({ className, ...props }: ComponentProps<"textarea">) {
       render={
         <textarea
           className={cn(
-            "min-h-20 w-full min-w-0 resize-y rounded-control border border-input bg-surface px-3 py-2 text-sm text-foreground transition-colors duration-(--duration-fast)",
+            "min-h-20 w-full min-w-0 resize-y rounded-control border-line border-input bg-surface px-pad-field-md py-2 text-sm text-foreground transition-colors duration-(--duration-fast)",
             "placeholder:text-muted-foreground hover:border-muted-foreground",
             "outline-none focus-visible:focus-ring focus-visible:border-ring focus-visible:outline-offset-0",
             "aria-invalid:border-danger-subtle-foreground data-invalid:border-danger-subtle-foreground disabled:cursor-not-allowed disabled:opacity-50",

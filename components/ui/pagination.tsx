@@ -37,16 +37,16 @@ function paginationRange(page: number, pageCount: number, siblings = 1): PageIte
 
 const pageVariants = cva(
   [
-    "relative isolate inline-flex shrink-0 cursor-pointer select-none items-center justify-center rounded-control font-medium text-foreground",
+    "relative isolate inline-flex shrink-0 cursor-pointer select-none items-center justify-center rounded-control font-label text-foreground",
     "outline-none transition-colors duration-(--duration-fast) hover:bg-hover active:bg-active focus-visible:focus-ring",
     "aria-[current=page]:text-primary-foreground aria-[current=page]:hover:bg-transparent aria-[current=page]:active:bg-transparent",
   ],
   {
     variants: {
       size: {
-        sm: "h-7 min-w-7 px-1.5 text-xs pointer-coarse:h-9 pointer-coarse:min-w-9",
-        md: "h-9 min-w-9 px-2 text-sm",
-        lg: "h-10 min-w-10 px-2.5 text-sm",
+        sm: "h-control-sm min-w-control-sm px-1.5 text-xs pointer-coarse:h-control-md pointer-coarse:min-w-control-md",
+        md: "h-control-md min-w-control-md px-2 text-sm",
+        lg: "h-control-lg min-w-control-lg px-2.5 text-sm",
       },
     },
     defaultVariants: { size: "md" },
@@ -127,7 +127,7 @@ function Pagination({ pageCount, page, defaultPage = 1, onPageChange, siblings =
           aria-disabled={unavailable || undefined}
           render={!unavailable && renderPage ? renderPage(to) : undefined}
           onClick={() => !unavailable && select(to)}
-          className="pointer-coarse:size-9 aria-disabled:pointer-events-none aria-disabled:opacity-50"
+          className="pointer-coarse:size-control-md aria-disabled:pointer-events-none aria-disabled:opacity-50"
         >
           {icon}
         </IconButton>

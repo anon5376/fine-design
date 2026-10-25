@@ -13,7 +13,7 @@ const semanticColors = Object.keys(tokens.semantic.light).filter(k => k !== "sha
 function Section({ id, title, children }: { id: string; title: string; children: ReactNode }) {
   return (
     <section aria-labelledby={id} className="grid grid-cols-1 gap-4">
-      <h2 id={id} className="text-base font-medium">
+      <h2 id={id} className="font-display text-base font-title">
         {title}
       </h2>
       {children}
@@ -21,17 +21,17 @@ function Section({ id, title, children }: { id: string; title: string; children:
   )
 }
 
-const th = "border-b border-border px-3 py-2 text-left text-xs font-medium text-muted-foreground"
+const th = "border-b-line border-border px-3 py-2 text-left text-xs font-label text-muted-foreground"
 const thEnd = th.replace("text-left", "text-right")
-const td = "border-b border-border px-3 py-2 align-middle"
+const td = "border-b-line border-border px-3 py-2 align-middle"
 
 export default function TokensPage() {
   return (
     <article className="grid grid-cols-1 gap-12">
-      <h1 className="text-2xl font-medium tracking-tight">Tokens</h1>
+      <h1 className="font-display text-2xl font-title tracking-tight">Tokens</h1>
 
       <Section id="semantic" title="Semantic colors">
-        <div className="overflow-x-auto rounded-container border border-border">
+        <div className="overflow-x-auto rounded-container border-line border-border">
           <table className="w-full min-w-md border-collapse text-sm">
             <thead>
               <tr>
@@ -47,7 +47,7 @@ export default function TokensPage() {
                   {(["light", "dark"] as const).map(mode => (
                     <td key={mode} className={td}>
                       <div className="flex items-center gap-2">
-                        <span className={`${mode} size-6 shrink-0 rounded-[0.25rem] border border-border`} style={{ background: `var(--${name})` }} />
+                        <span className={`${mode} size-6 shrink-0 rounded-small border-line border-border`} style={{ background: `var(--${name})` }} />
                         <span className="font-mono text-xs text-muted-foreground">{tokens.semantic[mode][name as keyof typeof tokens.semantic.light]}</span>
                       </div>
                     </td>
@@ -67,7 +67,7 @@ export default function TokensPage() {
               {STEPS.map(step => (
                 <div key={step} className="grid gap-1">
                   <span
-                    className="h-8 rounded-[0.25rem] border border-border"
+                    className="h-8 rounded-small border-line border-border"
                     style={{ background: `var(--${ramp}-${step})` }}
                     title={tokens.primitives[`${ramp}-${step}` as keyof typeof tokens.primitives]}
                   />
@@ -111,7 +111,7 @@ export default function TokensPage() {
         <div className="grid grid-cols-[repeat(auto-fill,minmax(8rem,1fr))] gap-4">
           {Object.keys(tokens.theme.radius).map(name => (
             <div key={name} className="grid gap-2">
-              <span className="h-16 border border-border bg-surface" style={{ borderRadius: `var(--radius-${name})` }} />
+              <span className="h-16 border-line border-border bg-surface" style={{ borderRadius: `var(--radius-${name})` }} />
               <span className="font-mono text-xs text-muted-foreground">radius-{name}</span>
             </div>
           ))}
@@ -151,7 +151,7 @@ export default function TokensPage() {
       <Section id="scalars" title="Layers, borders, breakpoints">
         <dl className="grid grid-cols-[repeat(auto-fill,minmax(12rem,1fr))] gap-x-6 gap-y-2 font-mono text-xs">
           {[...Object.entries(tokens.scalars).filter(([k]) => !k.startsWith("font") && !k.startsWith("duration")), ...Object.entries(tokens.theme.breakpoint).map(([k, v]) => [`breakpoint-${k}`, v])].map(([k, v]) => (
-            <div key={k} className="flex justify-between gap-3 border-b border-border py-1">
+            <div key={k} className="flex justify-between gap-3 border-b-line border-border py-1">
               <dt>{k}</dt>
               <dd className="text-muted-foreground">{v}</dd>
             </div>
@@ -160,7 +160,7 @@ export default function TokensPage() {
       </Section>
 
       <Section id="contrast" title="Contrast">
-        <div className="max-h-[32rem] overflow-auto rounded-container border border-border" tabIndex={0} role="region" aria-label="Contrast report">
+        <div className="max-h-[32rem] overflow-auto rounded-container border-line border-border" tabIndex={0} role="region" aria-label="Contrast report">
           <table className="w-full border-collapse text-sm">
             <thead className="sticky top-0 bg-surface">
               <tr>

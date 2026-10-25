@@ -42,12 +42,12 @@ function CommandPalette({ open, onOpenChange, groups }: CommandPaletteProps) {
           <DialogPrimitive.Popup
             aria-label="Command palette"
             className={cn(
-              "flex h-fit max-h-[min(28rem,76dvh)] w-full max-w-xl flex-col overflow-hidden rounded-container border border-border bg-surface text-sm text-foreground shadow-overlay outline-none",
+              "flex h-fit max-h-[min(28rem,76dvh)] w-full max-w-xl flex-col overflow-hidden rounded-container border-line border-border bg-surface text-sm text-foreground shadow-overlay outline-none",
               dialogMotion,
             )}
           >
             <Autocomplete.Root inline open items={groups} itemToStringValue={(c: Command) => c.label} autoHighlight="always">
-              <div className="flex items-center gap-2 border-b border-border px-3">
+              <div className="flex items-center gap-2 border-b-line border-border px-3">
                 <Search aria-hidden className="size-4 shrink-0 text-muted-foreground" strokeWidth={1.5} />
                 <Autocomplete.Input aria-label="Search commands" placeholder="Search" className="h-11 w-full bg-transparent outline-none placeholder:text-muted-foreground" />
               </div>
@@ -55,7 +55,7 @@ function CommandPalette({ open, onOpenChange, groups }: CommandPaletteProps) {
               <Autocomplete.List className="overflow-y-auto p-1 empty:hidden">
                 {(group: CommandGroup) => (
                   <Autocomplete.Group key={group.label} items={group.items} className="pb-1">
-                    <Autocomplete.GroupLabel className="px-2 pt-2 pb-1 text-xs font-medium text-muted-foreground">{group.label}</Autocomplete.GroupLabel>
+                    <Autocomplete.GroupLabel className="px-2 pt-2 pb-1 text-xs font-label text-muted-foreground">{group.label}</Autocomplete.GroupLabel>
                     <Autocomplete.Collection>
                       {(command: Command) => (
                         <Autocomplete.Item

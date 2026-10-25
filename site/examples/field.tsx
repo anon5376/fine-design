@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Field, FieldError, FieldLabel, Form } from "@/components/ui/field"
+import { Field, FieldDescription, FieldError, FieldLabel, Form } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 
 export function Default() {
@@ -34,6 +34,23 @@ export function ValidateOnSubmit() {
       </Field>
       <Button type="submit" className="justify-self-start">
         Save
+      </Button>
+    </Form>
+  )
+}
+
+export function WithHint() {
+  return (
+    <Form className="w-full max-w-xs" onFormSubmit={() => {}}>
+      <Field name="password">
+        <FieldLabel>Password</FieldLabel>
+        <Input type="password" autoComplete="new-password" required minLength={12} />
+        <FieldDescription>At least 12 characters.</FieldDescription>
+        <FieldError match="valueMissing">Enter a password.</FieldError>
+        <FieldError match="tooShort">Use at least 12 characters.</FieldError>
+      </Field>
+      <Button type="submit" className="justify-self-start">
+        Create account
       </Button>
     </Form>
   )

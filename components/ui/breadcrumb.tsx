@@ -43,7 +43,7 @@ function BreadcrumbLink({ className, render, ...props }: useRender.ComponentProp
 
 /** The current page: plain text, not a link. */
 function BreadcrumbPage({ className, ...props }: ComponentProps<"span">) {
-  return <span aria-current="page" className={cn("inline-flex h-8 items-center px-1.5 font-medium text-foreground", className)} {...props} />
+  return <span aria-current="page" className={cn("inline-flex h-8 items-center px-1.5 font-label text-foreground", className)} {...props} />
 }
 
 function BreadcrumbSeparator({ className, children, ...props }: ComponentProps<"li">) {

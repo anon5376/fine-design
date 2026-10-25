@@ -16,14 +16,14 @@ function PopoverContent({ className, side = "bottom", align = "center", sideOffs
   return (
     <PopoverPrimitive.Portal>
       <PopoverPrimitive.Positioner side={side} align={align} sideOffset={sideOffset} className="z-(--z-popover)">
-        <PopoverPrimitive.Popup className={cn(popupSurface, popupMotion, "grid w-72 max-w-(--available-width) gap-3 p-4 text-sm", className)} {...props} />
+        <PopoverPrimitive.Popup className={cn(popupSurface, popupMotion, "grid w-72 max-w-(--available-width) gap-3 p-pad-container-sm text-sm", className)} {...props} />
       </PopoverPrimitive.Positioner>
     </PopoverPrimitive.Portal>
   )
 }
 
 function PopoverTitle({ className, ...props }: ComponentProps<typeof PopoverPrimitive.Title>) {
-  return <PopoverPrimitive.Title className={cn("text-sm font-medium", className)} {...props} />
+  return <PopoverPrimitive.Title className={cn("text-sm font-title", className)} {...props} />
 }
 
 export { Popover, PopoverTrigger, PopoverContent, PopoverTitle, PopoverClose }

@@ -24,6 +24,14 @@ function FieldLabel({ className, ...props }: ComponentProps<typeof FieldPrimitiv
 }
 
 /**
+ * Hint under the control for a rule or format (password length, date pattern). Base UI links it to the
+ * input through aria-describedby, so screen readers read it with the label. Place it before FieldError.
+ */
+function FieldDescription({ className, ...props }: ComponentProps<typeof FieldPrimitive.Description>) {
+  return <FieldPrimitive.Description className={cn("text-xs text-muted-foreground", className)} {...props} />
+}
+
+/**
  * Validation message. Shows when the control is invalid; `match` narrows it to one
  * ValidityState key (e.g. "valueMissing"), and `match` with `invalid` on Field forces it.
  */
@@ -31,4 +39,4 @@ function FieldError({ className, ...props }: ComponentProps<typeof FieldPrimitiv
   return <FieldPrimitive.Error className={cn("text-xs text-danger-subtle-foreground", className)} {...props} />
 }
 
-export { Form, Field, FieldLabel, FieldError }
+export { Form, Field, FieldLabel, FieldDescription, FieldError }

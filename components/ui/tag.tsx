@@ -60,7 +60,7 @@ function Tag({ className, children, onRemove, removeLabel, ...props }: TagProps)
       data-tag=""
       inert={!present}
       className={cn(
-        "inline-flex h-6 shrink-0 items-center gap-1 whitespace-nowrap rounded-control border border-border bg-surface pl-2 text-xs font-medium text-foreground",
+        "inline-flex h-6 shrink-0 items-center gap-1 whitespace-nowrap rounded-control border-line border-border bg-surface pl-2 text-xs font-label text-foreground",
         onRemove ? "pr-0.5" : "pr-2",
         className,
       )}
@@ -74,7 +74,7 @@ function Tag({ className, children, onRemove, removeLabel, ...props }: TagProps)
           data-tag-remove=""
           onClick={remove}
           aria-label={removeLabel ?? (typeof children === "string" ? `Remove ${children}` : "Remove")}
-          className="inline-flex size-5 cursor-pointer items-center justify-center rounded-[0.25rem] text-muted-foreground outline-none transition-colors duration-(--duration-fast) hover:bg-hover hover:text-foreground focus-visible:focus-ring focus-visible:outline-offset-0"
+          className="inline-flex size-5 cursor-pointer items-center justify-center rounded-small text-muted-foreground outline-none transition-colors duration-(--duration-fast) hover:bg-hover hover:text-foreground focus-visible:focus-ring focus-visible:outline-offset-0"
         >
           <X className="size-3" strokeWidth={2} aria-hidden />
         </button>

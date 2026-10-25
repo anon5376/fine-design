@@ -1,6 +1,6 @@
 // Shared by every floating surface (Select, Combobox, DropdownMenu, Popover) so they look and move alike.
 
-export const popupSurface = "rounded-container border border-border bg-surface text-foreground shadow-overlay outline-none"
+export const popupSurface = "rounded-container border-line border-border bg-surface text-foreground shadow-overlay outline-none"
 
 /**
  * Fluid Functionalism popup motion (springs.ts puts dropdowns on the moderate tier): enters on it from

@@ -56,10 +56,10 @@ function ToastList() {
         "data-limited:pointer-events-none data-limited:opacity-0",
       )}
     >
-      <div className="flex items-center gap-3 rounded-container border border-border bg-surface py-2.5 pr-2 pl-3.5 text-sm text-foreground shadow-overlay group-focus-visible:focus-ring">
+      <div className="flex items-center gap-3 rounded-container border-line border-border bg-surface py-2.5 pr-2 pl-3.5 text-sm text-foreground shadow-overlay group-focus-visible:focus-ring">
         {t.type && icon[t.type]}
         <ToastPrimitive.Content className="min-w-0 flex-1">
-          <ToastPrimitive.Title className="font-medium" />
+          <ToastPrimitive.Title className="font-title" />
         </ToastPrimitive.Content>
         {t.actionProps && <ToastPrimitive.Action render={<Button variant="outline" size="sm" />} />}
         <ToastPrimitive.Close render={<IconButton label="Dismiss" size="sm" />}>

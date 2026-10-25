@@ -16,16 +16,16 @@ const tabsListVariants = cva("group/tabs relative isolate items-stretch select-n
   variants: {
     variant: {
       segmented: "inline-flex self-start rounded-container bg-muted p-0.5",
-      underline: "flex gap-1 border-b border-border",
+      underline: "flex gap-1 border-b-line border-border",
     },
-    size: { sm: "h-7", md: "h-9" },
+    size: { sm: "h-control-sm", md: "h-control-md" },
   },
   defaultVariants: { variant: "segmented", size: "md" },
 })
 
 const tabsTriggerVariants = cva(
   [
-    "relative z-10 inline-flex shrink-0 cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-control font-medium text-muted-foreground outline-none",
+    "relative z-10 inline-flex shrink-0 cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-control font-label text-muted-foreground outline-none",
     "transition-[color] duration-(--duration-fast) hover:text-foreground focus-visible:text-foreground focus-visible:focus-ring data-active:text-foreground data-disabled:pointer-events-none data-disabled:opacity-50",
     // Fluid hover feedback on icons: stroke 1.5 -> 2.
     "[&_svg]:shrink-0 [&_svg]:stroke-[1.5] [&_svg]:transition-[stroke-width] [&_svg]:duration-(--duration-fast) hover:[&_svg]:stroke-2 data-active:[&_svg]:stroke-2",
@@ -48,8 +48,8 @@ const indicatorMotion =
 const indicatorVariants = cva(["absolute top-0 left-0 w-(--active-tab-width) translate-x-(--active-tab-left)", indicatorMotion], {
   variants: {
     variant: {
-      segmented: "h-(--active-tab-height) translate-y-(--active-tab-top) rounded-control border border-border bg-surface shadow-raised",
-      underline: "top-auto -bottom-px h-0.5 bg-primary",
+      segmented: "h-(--active-tab-height) translate-y-(--active-tab-top) rounded-control border-line border-border bg-surface shadow-control",
+      underline: "top-auto -bottom-(--border-width) h-0.5 bg-primary",
     },
   },
   defaultVariants: { variant: "segmented" },

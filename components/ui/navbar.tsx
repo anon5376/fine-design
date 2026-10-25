@@ -12,11 +12,11 @@ import { cn } from "@/lib/utils"
 const navbarLinkVariants = cva(
   [
     "relative flex shrink-0 items-center whitespace-nowrap rounded-control px-3 text-sm text-muted-foreground outline-none focus-visible:focus-ring",
-    "transition-colors duration-(--duration-fast) hover:text-foreground aria-[current=page]:bg-active aria-[current=page]:font-medium aria-[current=page]:text-foreground",
+    "transition-colors duration-(--duration-fast) hover:text-foreground aria-[current=page]:bg-active aria-[current=page]:font-label aria-[current=page]:text-foreground",
   ],
   {
     variants: {
-      size: { md: "h-9", lg: "h-10" },
+      size: { md: "h-control-md", lg: "h-control-lg" },
     },
     defaultVariants: { size: "md" },
   },
@@ -44,7 +44,7 @@ type NavbarProps = Omit<ComponentProps<"header">, "children"> & {
 function Navbar({ brand, action, label = "Primary", className, children, ...props }: NavbarProps) {
   const [open, setOpen] = useState(false)
   return (
-    <header className={cn("sticky top-0 z-(--z-sticky) border-b border-border bg-background text-foreground", className)} {...props}>
+    <header className={cn("sticky top-0 z-(--z-sticky) border-b-line border-border bg-background text-foreground", className)} {...props}>
       <div className="mx-auto flex h-14 w-full max-w-[90rem] items-center gap-6 px-4 md:px-6">
         {brand}
         <NavbarLinks aria-label={label} className="hidden md:block">
@@ -111,7 +111,7 @@ function NavbarBrand({ render, className, ...props }: useRender.ComponentProps<"
   return useRender({
     render: render ?? <a />,
     props: {
-      className: cn("inline-flex h-9 shrink-0 items-center rounded-control text-base font-semibold tracking-tight outline-none focus-visible:focus-ring", className),
+      className: cn("inline-flex h-control-md shrink-0 items-center rounded-control text-base font-strong tracking-tight outline-none focus-visible:focus-ring", className),
       ...props,
     },
   })

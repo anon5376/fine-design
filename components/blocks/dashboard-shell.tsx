@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { Fragment, useState, type ReactNode } from "react"
 import { ArrowLeftRight, FileText, LayoutGrid, Menu, Plus, Settings, Users, Wallet } from "lucide-react"
 import { Avatar } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -18,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Heading } from "@/components/ui/heading"
+import type { IconProps } from "@/components/ui/icon"
 import { IconButton } from "@/components/ui/icon-button"
 import { Grid, Stack } from "@/components/ui/layout"
 import { Pagination } from "@/components/ui/pagination"
@@ -27,17 +28,41 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Text } from "@/components/ui/text"
 import { cn } from "@/lib/utils"
 
-const money = [
-  { id: "overview", label: "Overview", icon: LayoutGrid },
-  { id: "transfers", label: "Transfers", icon: ArrowLeftRight, count: 3 },
-  { id: "invoices", label: "Invoices", icon: FileText, count: 12 },
-  { id: "wallets", label: "Wallets", icon: Wallet },
+type NavItem = {
+  id: string
+  label: string
+  /** Any SVG component, e.g. a lucide-react icon. */
+  icon?: IconProps["icon"]
+  /** Trailing figure, e.g. an open count. */
+  count?: ReactNode
+  /** Defaults to `#<id>`. */
+  href?: string
+}
+type NavGroup = { label: string; items: NavItem[] }
+type Crumb = { label: string; href?: string }
+type Account = { name: string; email: string }
+
+const defaultNav: NavGroup[] = [
+  {
+    label: "Money",
+    items: [
+      { id: "overview", label: "Overview", icon: LayoutGrid },
+      { id: "transfers", label: "Transfers", icon: ArrowLeftRight, count: 3 },
+      { id: "invoices", label: "Invoices", icon: FileText, count: 12 },
+      { id: "wallets", label: "Wallets", icon: Wallet },
+    ],
+  },
+  {
+    label: "Company",
+    items: [
+      { id: "team", label: "Team", icon: Users },
+      { id: "settings", label: "Settings", icon: Settings },
+    ],
+  },
 ]
 
-const company = [
-  { id: "team", label: "Team", icon: Users },
-  { id: "settings", label: "Settings", icon: Settings },
-]
+const defaultBreadcrumb: Crumb[] = [{ label: "Northwind Ltd", href: "#overview" }, { label: "Overview" }]
+const defaultAccount: Account = { name: "Maya Okafor", email: "maya@northwind.co" }
 
 const metrics = [
   { label: "Available balance", value: "$248,630.42", main: true },
@@ -65,76 +90,164 @@ const tone = { Settled: "success", Pending: "warning", Failed: "danger" } as con
 const pageSize = 4
 
 // Rendered twice: in the sidebar from the container's 3xl width up, and in the drawer below it.
-function Links() {
+function Links({ nav, activeId }: { nav: NavGroup[]; activeId?: string }) {
   return (
     <>
-      <SidebarGroup>
-        <SidebarGroupLabel>Money</SidebarGroupLabel>
-        {money.map(item => (
-          <SidebarItem key={item.id} render={<a href={`#${item.id}`} />} icon={<item.icon />} count={"count" in item ? item.count : undefined} active={item.id === "overview"}>
-            {item.label}
-          </SidebarItem>
-        ))}
-      </SidebarGroup>
-      <SidebarGroup>
-        <SidebarGroupLabel>Company</SidebarGroupLabel>
-        {company.map(item => (
-          <SidebarItem key={item.id} render={<a href={`#${item.id}`} />} icon={<item.icon />}>
-            {item.label}
-          </SidebarItem>
-        ))}
-      </SidebarGroup>
+      {nav.map(group => (
+        <SidebarGroup key={group.label}>
+          <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+          {group.items.map(item => (
+            <SidebarItem key={item.id} render={<a href={item.href ?? `#${item.id}`} />} icon={item.icon && <item.icon />} count={item.count} active={item.id === activeId}>
+              {item.label}
+            </SidebarItem>
+          ))}
+        </SidebarGroup>
+      ))}
     </>
   )
 }
 
-const wordmark = "text-base font-semibold tracking-tight"
+const wordmark = "text-base font-strong tracking-tight"
 
-/** App frame that fills its container (give the parent a height). Layout follows the frame's width, not the viewport's. */
-export function DashboardShell() {
-  const [menuOpen, setMenuOpen] = useState(false)
+/** The default main content: metrics and a paged table of recent transfers. */
+function Overview() {
   const [page, setPage] = useState(1)
   const rows = transfers.slice((page - 1) * pageSize, page * pageSize)
+
+  return (
+    <>
+    <Grid gap="md" className="grid-cols-1 @lg:grid-cols-2 @7xl:grid-cols-4">
+      {metrics.map(metric => (
+        <Card key={metric.label} className="gap-1">
+          <Text variant="muted">{metric.label}</Text>
+          <Text className={cn("figures text-xl font-title", "main" in metric && "text-accent")}>{metric.value}</Text>
+        </Card>
+      ))}
+    </Grid>
+    <Grid gap="md" className="items-start @7xl:grid-cols-[minmax(0,1fr)_18rem]">
+      <Card>
+        <CardHeader>
+          <Heading level={2} size="sm">
+            Recent transfers
+          </Heading>
+        </CardHeader>
+        <Table aria-label="Recent transfers">
+          <TableHeader>
+            <TableRow>
+              <TableHead>Transfer</TableHead>
+              <TableHead>Recipient</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead numeric>Amount</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {rows.map(t => (
+              <TableRow key={t.id}>
+                <TableCell className="figures text-muted-foreground">{t.id}</TableCell>
+                <TableCell className="whitespace-nowrap">{t.to}</TableCell>
+                <TableCell>
+                  <Badge variant={tone[t.status]}>{t.status}</Badge>
+                </TableCell>
+                <TableCell numeric>{t.amount}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+        <Pagination pageCount={Math.ceil(transfers.length / pageSize)} page={page} onPageChange={setPage} className="flex justify-end" />
+      </Card>
+      <Card>
+        <Progress label="Monthly limit used" value={62} />
+      </Card>
+    </Grid>
+    </>
+  )
+}
+
+type DashboardShellProps = {
+  /** Wordmark in the sidebar and the drawer. */
+  brand?: ReactNode
+  /** Sidebar groups, also shown in the drawer below the container's 3xl width. */
+  nav?: NavGroup[]
+  /** `id` of the current nav item. */
+  activeId?: string
+  /** Trail in the top bar; the last entry is the current page. */
+  breadcrumb?: Crumb[]
+  /** Person in the top bar menu. */
+  account?: Account
+  /** Page heading, set as the h1. */
+  title?: ReactNode
+  /** Beside the page heading. */
+  actions?: ReactNode
+  /** Page content under the heading. Defaults to the transfers overview. */
+  children?: ReactNode
+}
+
+const initials = (name: string) =>
+  name
+    .split(" ")
+    .map(word => word[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase()
+
+/** App frame that fills its container (give the parent a height). Layout follows the frame's width, not the viewport's. */
+export function DashboardShell({
+  brand = "Ledgerly",
+  nav = defaultNav,
+  activeId = "overview",
+  breadcrumb = defaultBreadcrumb,
+  account = defaultAccount,
+  title = "Overview",
+  actions = (
+    <Button>
+      <Plus />
+      New transfer
+    </Button>
+  ),
+  children = <Overview />,
+}: DashboardShellProps) {
+  const [menuOpen, setMenuOpen] = useState(false)
 
   return (
     <Stack direction="row" gap="none" className="@container h-full min-h-0 w-full overflow-hidden bg-background text-foreground">
       <Sidebar className="hidden @3xl:flex">
         <SidebarHeader>
-          <span className={wordmark}>Ledgerly</span>
+          <span className={wordmark}>{brand}</span>
         </SidebarHeader>
         <SidebarContent aria-label="Workspace">
-          <Links />
+          <Links nav={nav} activeId={activeId} />
         </SidebarContent>
       </Sidebar>
       <Stack gap="none" className="min-w-0 flex-1">
-        <Stack render={<header />} direction="row" gap="sm" align="center" className="h-14 shrink-0 border-b border-border px-4 @3xl:px-6">
+        <Stack render={<header />} direction="row" gap="sm" align="center" className="h-14 shrink-0 border-b-line border-border px-4 @3xl:px-6">
           <Drawer open={menuOpen} onOpenChange={setMenuOpen}>
             <DrawerTrigger render={<IconButton label="Open menu" className="-ml-2 @3xl:hidden" />}>
               <Menu />
             </DrawerTrigger>
             <DrawerContent>
-              <DrawerTitle>Ledgerly</DrawerTitle>
+              <DrawerTitle>{brand}</DrawerTitle>
               <SidebarContent aria-label="Workspace" onClick={e => (e.target as Element).closest("a") && setMenuOpen(false)}>
-                <Links />
+                <Links nav={nav} activeId={activeId} />
               </SidebarContent>
             </DrawerContent>
           </Drawer>
           <Breadcrumb className="min-w-0">
-            <BreadcrumbItem>
-              <BreadcrumbLink href="#overview">Northwind Ltd</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Overview</BreadcrumbPage>
-            </BreadcrumbItem>
+            {breadcrumb.map((crumb, i) => (
+              <Fragment key={i}>
+                {i > 0 && <BreadcrumbSeparator />}
+                <BreadcrumbItem>
+                  {i === breadcrumb.length - 1 ? <BreadcrumbPage>{crumb.label}</BreadcrumbPage> : <BreadcrumbLink href={crumb.href ?? "#"}>{crumb.label}</BreadcrumbLink>}
+                </BreadcrumbItem>
+              </Fragment>
+            ))}
           </Breadcrumb>
           <DropdownMenu>
             <DropdownMenuTrigger className="ml-auto shrink-0 cursor-pointer rounded-full outline-none focus-visible:focus-ring">
-              <Avatar alt="Maya Okafor" fallback="MO" />
+              <Avatar alt={account.name} fallback={initials(account.name)} />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuGroup>
-                <DropdownMenuLabel>maya@northwind.co</DropdownMenuLabel>
+                <DropdownMenuLabel>{account.email}</DropdownMenuLabel>
                 <DropdownMenuItem>Profile</DropdownMenuItem>
                 <DropdownMenuItem>Settings</DropdownMenuItem>
               </DropdownMenuGroup>
@@ -146,58 +259,15 @@ export function DashboardShell() {
         <Stack render={<main />} gap="lg" tabIndex={0} className="min-h-0 flex-1 overflow-y-auto p-4 outline-none focus-visible:-outline-offset-2 focus-visible:focus-ring @3xl:p-6">
           <Stack direction="row" gap="md" align="center" justify="between" wrap>
             <Heading level={1} size="lg">
-              Overview
+              {title}
             </Heading>
-            <Button>
-              <Plus />
-              New transfer
-            </Button>
+            {actions}
           </Stack>
-          <Grid gap="md" className="grid-cols-1 @lg:grid-cols-2 @7xl:grid-cols-4">
-            {metrics.map(metric => (
-              <Card key={metric.label} className="gap-1">
-                <Text variant="muted">{metric.label}</Text>
-                <Text className={cn("figures text-xl font-medium", "main" in metric && "text-accent")}>{metric.value}</Text>
-              </Card>
-            ))}
-          </Grid>
-          <Grid gap="md" className="items-start @7xl:grid-cols-[minmax(0,1fr)_18rem]">
-            <Card>
-              <CardHeader>
-                <Heading level={2} size="sm">
-                  Recent transfers
-                </Heading>
-              </CardHeader>
-              <Table aria-label="Recent transfers">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Transfer</TableHead>
-                    <TableHead>Recipient</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead numeric>Amount</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {rows.map(t => (
-                    <TableRow key={t.id}>
-                      <TableCell className="figures text-muted-foreground">{t.id}</TableCell>
-                      <TableCell className="whitespace-nowrap">{t.to}</TableCell>
-                      <TableCell>
-                        <Badge variant={tone[t.status]}>{t.status}</Badge>
-                      </TableCell>
-                      <TableCell numeric>{t.amount}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              <Pagination pageCount={Math.ceil(transfers.length / pageSize)} page={page} onPageChange={setPage} className="flex justify-end" />
-            </Card>
-            <Card>
-              <Progress label="Monthly limit used" value={62} />
-            </Card>
-          </Grid>
+          {children}
         </Stack>
       </Stack>
     </Stack>
   )
 }
+
+export type { Account, Crumb, DashboardShellProps, NavGroup, NavItem }

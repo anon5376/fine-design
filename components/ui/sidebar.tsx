@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils"
 
 type Size = NonNullable<VariantProps<typeof sidebarVariants>["size"]>
 
-const sidebarVariants = cva("flex h-full shrink-0 flex-col overflow-y-auto border-r border-border bg-background text-foreground", {
+const sidebarVariants = cva("flex h-full shrink-0 flex-col overflow-y-auto border-r-line border-border bg-background text-foreground", {
   variants: {
     size: { sm: "w-48 gap-4 px-2 py-4", md: "w-60 gap-8 px-3 py-6" },
   },
@@ -18,13 +18,13 @@ const sidebarVariants = cva("flex h-full shrink-0 flex-col overflow-y-auto borde
 const sidebarItemVariants = cva(
   [
     "group relative flex shrink-0 items-center gap-2 rounded-control text-muted-foreground outline-none focus-visible:focus-ring",
-    "transition-colors duration-(--duration-fast) hover:text-foreground aria-[current=page]:bg-active aria-[current=page]:font-medium aria-[current=page]:text-foreground",
+    "transition-colors duration-(--duration-fast) hover:text-foreground aria-[current=page]:bg-active aria-[current=page]:font-label aria-[current=page]:text-foreground",
     // Fluid hover feedback on icons: stroke 1.5 -> 2, held on the current page.
     "[&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:stroke-[1.5] [&_svg]:transition-[stroke-width] [&_svg]:duration-(--duration-fast) hover:[&_svg]:stroke-2 aria-[current=page]:[&_svg]:stroke-2",
   ],
   {
     variants: {
-      size: { sm: "h-7 px-2 text-xs pointer-coarse:h-8", md: "h-8 px-3 text-sm" },
+      size: { sm: "h-control-sm px-2 text-xs pointer-coarse:h-8", md: "h-8 px-3 text-sm" },
     },
     defaultVariants: { size: "md" },
   },

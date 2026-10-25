@@ -2,7 +2,7 @@ import { createElement, type ComponentProps } from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
-const headingVariants = cva("font-medium text-foreground text-balance", {
+const headingVariants = cva("font-display font-title text-foreground text-balance", {
   variants: {
     size: {
       sm: "text-base",

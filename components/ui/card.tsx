@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils"
 function Card({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
-      className={cn("grid gap-4 rounded-container border border-border bg-surface p-5 text-foreground shadow-raised", className)}
+      className={cn("grid gap-4 rounded-container border-line border-border bg-surface p-pad-container-md text-foreground shadow-raised", className)}
       {...props}
     />
   )
@@ -15,7 +15,7 @@ function CardHeader({ className, ...props }: ComponentProps<"div">) {
 }
 
 function CardTitle({ className, ...props }: ComponentProps<"h3">) {
-  return <h3 className={cn("text-base font-semibold tracking-tight", className)} {...props} />
+  return <h3 className={cn("font-display text-base font-strong tracking-tight", className)} {...props} />
 }
 
 function CardContent({ className, ...props }: ComponentProps<"div">) {

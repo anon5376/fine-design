@@ -6,7 +6,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const progressVariants = cva(
-  "h-full rounded-full transition-[width] duration-(--duration-slow) ease-enter data-indeterminate:w-full data-indeterminate:motion-safe:animate-pulse motion-reduce:transition-none",
+  "h-full rounded-pill transition-[width] duration-(--duration-slow) ease-enter data-indeterminate:w-full data-indeterminate:motion-safe:animate-pulse motion-reduce:transition-none",
   {
     variants: {
       // `accent` is for the one figure the screen is about; everything else stays ink.
@@ -38,10 +38,10 @@ function Progress({ className, variant, label, showValue = true, ...props }: Pro
   return (
     <ProgressPrimitive.Root className={cn("grid w-full gap-1.5", className)} {...props}>
       <div className="flex items-baseline justify-between gap-4 text-sm">
-        <ProgressPrimitive.Label className="font-medium text-foreground">{label}</ProgressPrimitive.Label>
+        <ProgressPrimitive.Label className="font-label text-foreground">{label}</ProgressPrimitive.Label>
         {showValue && <ProgressPrimitive.Value className="figures text-muted-foreground" />}
       </div>
-      <ProgressPrimitive.Track className="h-1.5 w-full overflow-hidden rounded-full bg-secondary">
+      <ProgressPrimitive.Track className="h-1.5 w-full overflow-hidden rounded-pill bg-secondary">
         <ProgressPrimitive.Indicator className={cn(progressVariants({ variant }), reset && "transition-none")} />
       </ProgressPrimitive.Track>
     </ProgressPrimitive.Root>

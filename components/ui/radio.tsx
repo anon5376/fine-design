@@ -15,7 +15,7 @@ function Radio({ className, ...props }: ComponentProps<typeof RadioPrimitive.Roo
   return (
     <RadioPrimitive.Root
       className={cn(
-        "inline-flex size-4 shrink-0 cursor-pointer items-center justify-center rounded-full border border-input bg-surface transition-colors duration-(--duration-fast)",
+        "inline-flex size-4 shrink-0 cursor-pointer items-center justify-center rounded-full border-line border-input bg-surface transition-colors duration-(--duration-fast)",
         "outline-none hover:border-muted-foreground focus-visible:focus-ring data-checked:border-primary",
         "data-disabled:cursor-not-allowed data-disabled:opacity-50",
         className,

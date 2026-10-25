@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "../styles/fine.css";
+@import "../styles/presets.css";
 
 @source "../components";
 @source "../site";

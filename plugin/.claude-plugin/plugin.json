@@ -1,6 +1,6 @@
 {
   "name": "fine-design",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Build UI with Fine, a React design system on Base UI, Tailwind v4 and Motion. A skill with the design rules, plus the shadcn MCP server to search, view and add Fine components.",
   "author": {
     "name": "anon5376",

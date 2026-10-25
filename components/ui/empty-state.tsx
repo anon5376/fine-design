@@ -13,7 +13,7 @@ type EmptyStateProps = Omit<ComponentProps<"div">, "title"> & {
 function EmptyState({ className, art, title, action, ...props }: EmptyStateProps) {
   return (
     <div
-      className={cn("grid justify-items-center gap-4 rounded-container border border-border px-6 py-12 text-center", className)}
+      className={cn("grid justify-items-center gap-4 rounded-container border-line border-border px-6 py-12 text-center", className)}
       {...props}
     >
       {art != null &&
@@ -26,7 +26,7 @@ function EmptyState({ className, art, title, action, ...props }: EmptyStateProps
             {art}
           </div>
         ))}
-      <p className="max-w-xs text-sm font-medium text-foreground text-balance">{title}</p>
+      <p className="max-w-xs text-sm font-title text-foreground text-balance">{title}</p>
       {action}
     </div>
   )

@@ -162,3 +162,13 @@ test("navbar at 375px: Open menu opens the drawer with the links, Escape closes 
   await expect(drawer).toBeHidden()
   await expect(trigger).toBeFocused()
 })
+
+test("field: the hint is linked to the input through aria-describedby", async ({ page }) => {
+  await open(page, "/components/field/")
+  const input = page.locator('section[aria-labelledby="example-WithHint"]').getByLabel("Password")
+  const ids = (await input.getAttribute("aria-describedby"))?.split(" ").filter(Boolean) ?? []
+  expect(ids.length).toBeGreaterThan(0)
+  const described = await page.evaluate(ids => ids.map(id => document.getElementById(id)?.textContent ?? null), ids)
+  expect(described).toContain("At least 12 characters.")
+  await expect(input).toHaveAccessibleDescription("At least 12 characters.")
+})

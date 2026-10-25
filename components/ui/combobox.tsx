@@ -33,10 +33,10 @@ function Combobox<Value, Multiple extends boolean | undefined = false>({ onItemH
 function ComboboxInput({ className, ...props }: ComponentProps<typeof ComboboxPrimitive.Input>) {
   return (
     <ComboboxPrimitive.InputGroup className="relative w-full">
-      <ComboboxPrimitive.Input className={cn(inputVariants(), "pr-9", className)} {...props} />
+      <ComboboxPrimitive.Input className={cn(inputVariants(), "pr-control-md", className)} {...props} />
       <ComboboxPrimitive.Trigger
         aria-label="Show options"
-        className="absolute inset-y-0 right-0 flex w-9 cursor-pointer items-center justify-center rounded-r-control text-muted-foreground outline-none hover:text-foreground focus-visible:focus-ring"
+        className="absolute inset-y-0 right-0 flex w-control-md cursor-pointer items-center justify-center rounded-r-control text-muted-foreground outline-none hover:text-foreground focus-visible:focus-ring"
       >
         <ChevronsUpDown className="size-4" strokeWidth={1.5} />
       </ComboboxPrimitive.Trigger>

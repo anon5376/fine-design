@@ -1,5 +1,6 @@
 "use client"
 
+import type { ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import { Heading } from "@/components/ui/heading"
 import { Container, Stack } from "@/components/ui/layout"
@@ -61,30 +62,53 @@ function LedgerStack() {
   )
 }
 
-function Hero() {
+type HeroProps = {
+  /** Headline, set as the page's h1. */
+  title?: ReactNode
+  /** Sentence under the headline. */
+  description?: ReactNode
+  /** Buttons or links under the description. */
+  actions?: ReactNode
+  /** Below the text, beside it from lg. Defaults to the transfer slips; null drops it. */
+  media?: ReactNode
+}
+
+function Hero({
+  title = "Every transfer, reconciled",
+  description = "Send money, issue invoices and close the month from one account.",
+  actions = (
+    <>
+      <Button size="lg" render={<a href="#" />}>
+        Open an account
+      </Button>
+      <Button size="lg" variant="secondary" render={<a href="#" />}>
+        View pricing
+      </Button>
+    </>
+  ),
+  media = <LedgerStack />,
+}: HeroProps) {
   return (
     <Container render={<section />} className="py-16 md:py-24">
       <Stack gap="2xl" align="center" className="lg:flex-row lg:justify-between">
         <Stack gap="lg" align="start" className="w-full max-w-xl">
           <Heading level={1} size="display" className="text-4xl sm:text-5xl lg:text-6xl">
-            Every transfer, reconciled
+            {title}
           </Heading>
           <Text size="lg" variant="muted">
-            Send money, issue invoices and close the month from one account.
+            {description}
           </Text>
-          <Stack direction="row" gap="sm" wrap>
-            <Button size="lg" render={<a href="#" />}>
-              Open an account
-            </Button>
-            <Button size="lg" variant="secondary" render={<a href="#" />}>
-              View pricing
-            </Button>
-          </Stack>
+          {actions && (
+            <Stack direction="row" gap="sm" wrap>
+              {actions}
+            </Stack>
+          )}
         </Stack>
-        <LedgerStack />
+        {media}
       </Stack>
     </Container>
   )
 }
 
 export { Hero }
+export type { HeroProps }

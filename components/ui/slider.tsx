@@ -43,8 +43,8 @@ function Slider({ className, value, defaultValue, onValueChange, "aria-label": l
       {...props}
     >
       <SliderPrimitive.Control className="flex h-5 w-full touch-none select-none items-center data-disabled:opacity-50">
-        <SliderPrimitive.Track className="h-1 w-full rounded-full bg-secondary">
-          <SliderPrimitive.Indicator data-glide={glide ? "" : undefined} onTransitionEnd={settle} className={cn("rounded-full bg-primary", glideRange)} />
+        <SliderPrimitive.Track className="h-1 w-full rounded-pill bg-secondary">
+          <SliderPrimitive.Indicator data-glide={glide ? "" : undefined} onTransitionEnd={settle} className={cn("rounded-pill bg-primary", glideRange)} />
           {Array.from({ length: thumbs }, (_, i) => (
             <SliderPrimitive.Thumb
               key={i}

@@ -52,13 +52,14 @@ export const components: Entry[] = [
 
 // Blocks render components/blocks/<slug>.tsx directly. `frame` sizes the docs box around them:
 // center (default) pads and centers, full runs edge to edge, app is full width at a fixed height.
+// `examples` holds the customized uses in site/examples/block-<slug>.tsx, framed the same way.
 export type BlockFrame = "center" | "full" | "app"
-export const blocks: (Entry & { exportName: string; frame?: BlockFrame })[] = [
-  { slug: "auth-form", title: "Auth form", exportName: "AuthForm", load: () => import("@/components/blocks/auth-form") },
-  { slug: "hero", title: "Hero", exportName: "Hero", frame: "full", load: () => import("@/components/blocks/hero") },
-  { slug: "feature-grid", title: "Feature grid", exportName: "FeatureGrid", frame: "full", load: () => import("@/components/blocks/feature-grid") },
-  { slug: "pricing", title: "Pricing", exportName: "Pricing", frame: "full", load: () => import("@/components/blocks/pricing") },
-  { slug: "faq", title: "FAQ", exportName: "Faq", frame: "full", load: () => import("@/components/blocks/faq") },
-  { slug: "footer", title: "Footer", exportName: "Footer", frame: "full", load: () => import("@/components/blocks/footer") },
-  { slug: "dashboard-shell", title: "Dashboard shell", exportName: "DashboardShell", frame: "app", load: () => import("@/components/blocks/dashboard-shell") },
+export const blocks: (Entry & { exportName: string; frame?: BlockFrame; examples: () => Promise<ExampleModule> })[] = [
+  { slug: "auth-form", title: "Auth form", exportName: "AuthForm", load: () => import("@/components/blocks/auth-form"), examples: () => import("@/site/examples/block-auth-form") },
+  { slug: "hero", title: "Hero", exportName: "Hero", frame: "full", load: () => import("@/components/blocks/hero"), examples: () => import("@/site/examples/block-hero") },
+  { slug: "feature-grid", title: "Feature grid", exportName: "FeatureGrid", frame: "full", load: () => import("@/components/blocks/feature-grid"), examples: () => import("@/site/examples/block-feature-grid") },
+  { slug: "pricing", title: "Pricing", exportName: "Pricing", frame: "full", load: () => import("@/components/blocks/pricing"), examples: () => import("@/site/examples/block-pricing") },
+  { slug: "faq", title: "FAQ", exportName: "Faq", frame: "full", load: () => import("@/components/blocks/faq"), examples: () => import("@/site/examples/block-faq") },
+  { slug: "footer", title: "Footer", exportName: "Footer", frame: "full", load: () => import("@/components/blocks/footer"), examples: () => import("@/site/examples/block-footer") },
+  { slug: "dashboard-shell", title: "Dashboard shell", exportName: "DashboardShell", frame: "app", load: () => import("@/components/blocks/dashboard-shell"), examples: () => import("@/site/examples/block-dashboard-shell") },
 ]

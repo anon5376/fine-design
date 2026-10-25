@@ -34,7 +34,7 @@ function DialogContent({ className, children, showClose = true, ...props }: Dial
       <DialogPrimitive.Viewport className="fixed inset-0 z-(--z-overlay) grid place-items-center overflow-y-auto p-4">
         <DialogPrimitive.Popup
           className={cn(
-            "relative grid w-full max-w-md gap-4 rounded-container border border-border bg-surface p-6 text-sm text-foreground shadow-overlay outline-none",
+            "relative grid w-full max-w-md gap-4 rounded-container border-line border-border bg-surface p-pad-container-lg text-sm text-foreground shadow-overlay outline-none",
             dialogMotion,
             className,
           )}
@@ -53,7 +53,7 @@ function DialogContent({ className, children, showClose = true, ...props }: Dial
 }
 
 function DialogTitle({ className, ...props }: ComponentProps<typeof DialogPrimitive.Title>) {
-  return <DialogPrimitive.Title className={cn("pr-8 text-base font-semibold tracking-tight", className)} {...props} />
+  return <DialogPrimitive.Title className={cn("pr-8 font-display text-base font-strong tracking-tight", className)} {...props} />
 }
 
 function DialogDescription({ className, ...props }: ComponentProps<typeof DialogPrimitive.Description>) {

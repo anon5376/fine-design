@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
   [
-    "group relative isolate inline-flex shrink-0 cursor-pointer select-none items-center justify-center whitespace-nowrap rounded-control font-medium",
+    "group relative isolate inline-flex shrink-0 cursor-pointer select-none items-center justify-center whitespace-nowrap rounded-control font-label",
     "outline-none focus-visible:focus-ring disabled:pointer-events-none disabled:opacity-50 aria-busy:cursor-progress",
     // Fluid hover feedback on icons: stroke 1.5 -> 2.
     "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([data-spinner])]:stroke-[1.5] [&_svg:not([data-spinner])]:transition-[stroke-width] [&_svg:not([data-spinner])]:duration-(--duration-fast) hover:[&_svg:not([data-spinner])]:stroke-2",
@@ -22,20 +22,21 @@ const buttonVariants = cva(
         danger: "text-danger-foreground",
       },
       size: {
-        sm: "h-7 gap-1 px-2.5 text-xs [&_svg]:size-3.5",
-        md: "h-9 gap-1.5 px-3.5 text-sm [&_svg]:size-4",
-        lg: "h-10 gap-2 px-4 text-sm [&_svg]:size-4",
+        sm: "h-control-sm gap-1 px-pad-control-sm text-xs [&_svg]:size-3.5",
+        md: "h-control-md gap-1.5 px-pad-control-md text-sm [&_svg]:size-4",
+        lg: "h-control-lg gap-2 px-pad-control-lg text-sm [&_svg]:size-4",
       },
     },
     defaultVariants: { variant: "primary", size: "md" },
   },
 )
 
-// Fluid Functionalism press geometry: the fill sits 1px inside the button and a
-// same-color 1px spread fills it back out. Pressing collapses the spread, so the
-// button shrinks exactly 1px per side at any width, where a scale would warp.
+// Fluid Functionalism press geometry: the fill sits one edge inside the button and a
+// same-color spread of that edge fills it back out. Pressing collapses the spread, so the
+// button shrinks exactly one edge per side at any width, where a scale would warp.
+// The edge is 1px, except on the outline variant, where it is the preset's border width.
 const surfaceVariants = cva(
-  "absolute inset-px rounded-[inherit] bg-(--btn-bg) shadow-[0_0_0_1px_var(--btn-bg)] transition-[box-shadow,background-color] duration-(--duration-moderate) ease-enter group-active:shadow-[0_0_0_0_var(--btn-bg)] group-active:duration-(--duration-fast)",
+  "absolute inset-[var(--btn-edge,1px)] rounded-[inherit] bg-(--btn-bg) shadow-[0_0_0_var(--btn-edge,1px)_var(--btn-bg)] transition-[box-shadow,background-color] duration-(--duration-moderate) ease-enter group-active:shadow-[0_0_0_0_var(--btn-bg)] group-active:duration-(--duration-fast)",
   {
     variants: {
       variant: {
@@ -43,7 +44,7 @@ const surfaceVariants = cva(
         secondary: "[--btn-bg:var(--secondary)] group-hover:[--btn-bg:var(--secondary-hover)] group-active:[--btn-bg:var(--secondary-active)]",
         // The border is an outer ring at rest that hands off to an inset ring when pressed.
         outline:
-          "[--btn-bg:transparent] shadow-[0_0_0_1px_var(--input),inset_0_0_0_0_var(--input)] group-hover:[--btn-bg:var(--hover)] group-active:[--btn-bg:var(--active)] group-active:shadow-[0_0_0_0_var(--input),inset_0_0_0_1px_var(--input)]",
+          "[--btn-edge:var(--border-width)] [--btn-bg:transparent] shadow-[0_0_0_var(--btn-edge)_var(--input),inset_0_0_0_0_var(--input)] group-hover:[--btn-bg:var(--hover)] group-active:[--btn-bg:var(--active)] group-active:shadow-[0_0_0_0_var(--input),inset_0_0_0_var(--btn-edge)_var(--input)]",
         ghost: "[--btn-bg:transparent] group-hover:[--btn-bg:var(--hover)] group-active:[--btn-bg:var(--active)]",
         danger: "[--btn-bg:var(--danger)] group-hover:[--btn-bg:var(--danger-hover)] group-active:[--btn-bg:var(--danger-active)]",
       },

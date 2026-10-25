@@ -13,6 +13,8 @@ async function open(page: Page, path: string) {
 const allowed: { rule: string; selector: string; why: string }[] = [
   // Docs examples show several instances of one component on a page; a real page has one.
   { rule: "landmark-unique", selector: 'section[aria-labelledby^="example-"] nav', why: "repeated demo instances" },
+  // A block page shows the default footer and a customised one.
+  { rule: "landmark-unique", selector: "article footer nav", why: "repeated demo instances" },
   // Popups are portaled to the end of <body>, outside the page landmarks; their roles and focus handling announce them.
   { rule: "region", selector: "[data-base-ui-portal]", why: "portaled popups" },
   // The dashboard-shell block is a whole app (with its own <main>) shown inside the docs page's <main>.
@@ -106,4 +108,40 @@ for (const scheme of ["light", "dark"] as const) {
       await scan(page)
     })
   })
+}
+
+// The same scans under each non-default preset. Ledger is covered above; the preset is applied the way a visitor's choice is,
+// through localStorage before the page loads.
+const presetPaths = ["/", "/components/field/", "/components/button/", "/blocks/hero/", "/blocks/pricing/"]
+
+for (const preset of ["folio", "poster"]) {
+  for (const scheme of ["light", "dark"] as const) {
+    test.describe(`${preset} ${scheme}`, () => {
+      test.use({ colorScheme: scheme })
+      test.beforeEach(async ({ page }) => {
+        await page.addInitScript(id => localStorage.setItem("preset", id), preset)
+      })
+
+      for (const path of presetPaths)
+        test(`page ${path}`, async ({ page }) => {
+          await open(page, path)
+          await expect(page.locator("html")).toHaveAttribute("data-preset", preset)
+          await scan(page)
+        })
+
+      test("select open", async ({ page }) => {
+        await open(page, "/components/select/")
+        await page.getByRole("combobox", { name: "Network" }).first().click()
+        await expect(page.getByRole("listbox")).toBeVisible()
+        await scan(page)
+      })
+
+      test("dialog open", async ({ page }) => {
+        await open(page, "/components/dialog/")
+        await page.getByRole("button", { name: "Rename wallet" }).click()
+        await expect(page.getByRole("dialog", { name: "Rename wallet" })).toBeVisible()
+        await scan(page)
+      })
+    })
+  }
 }

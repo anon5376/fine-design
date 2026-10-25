@@ -10,13 +10,13 @@ const credits = [
 ]
 
 const cardLink =
-  "rounded-container border border-border bg-surface px-4 py-3 font-medium transition-colors duration-(--duration-fast) hover:bg-muted"
+  "rounded-container border-line border-border bg-surface px-4 py-3 font-label transition-colors duration-(--duration-fast) hover:bg-muted"
 
 export default function Home() {
   return (
     <div className="grid grid-cols-1 gap-10">
       <section aria-labelledby="components" className="grid gap-4">
-        <h1 id="components" className="text-2xl font-medium tracking-tight">
+        <h1 id="components" className="font-display text-2xl font-title tracking-tight">
           Components
         </h1>
         <ul className="grid grid-cols-[repeat(auto-fill,minmax(10rem,1fr))] gap-3">
@@ -30,7 +30,7 @@ export default function Home() {
         </ul>
       </section>
       <section aria-labelledby="blocks" className="grid gap-4">
-        <h2 id="blocks" className="text-base font-medium">
+        <h2 id="blocks" className="font-display text-base font-title">
           Blocks
         </h2>
         <ul className="grid grid-cols-[repeat(auto-fill,minmax(10rem,1fr))] gap-3">
@@ -44,7 +44,7 @@ export default function Home() {
         </ul>
       </section>
       <section aria-labelledby="credits" className="grid gap-4">
-        <h2 id="credits" className="text-base font-medium">
+        <h2 id="credits" className="font-display text-base font-title">
           Credits
         </h2>
         <ul className="flex flex-wrap gap-x-5 gap-y-2 text-muted-foreground">

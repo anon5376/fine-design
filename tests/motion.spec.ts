@@ -171,7 +171,7 @@ const cases: Case[] = [
     token: 80,
     movement: true,
     setup: async p => {
-      await p.getByRole("combobox").first().click()
+      await p.locator("#main").getByRole("combobox").first().click() // not the preset switch in the sidebar
       await p.keyboard.type("a")
       await p.waitForTimeout(300)
       await p.keyboard.press("ArrowDown")
@@ -355,7 +355,7 @@ const cases: Case[] = [
     props: ["opacity", "transform"],
     token: ms("duration-moderate"),
     movement: true,
-    act: p => p.getByRole("tab", { name: "Monthly" }).click(), // Growth 24 to 29
+    act: p => p.getByRole("tab", { name: "Monthly" }).first().click(), // Growth 24 to 29
   },
   {
     name: "tag leaves on the fast exit",

@@ -13,7 +13,7 @@ function Checkbox({ className, ...props }: ComponentProps<typeof CheckboxPrimiti
   return (
     <CheckboxPrimitive.Root
       className={cn(
-        "inline-flex size-4 shrink-0 cursor-pointer items-center justify-center rounded-[0.25rem] border border-input bg-surface text-primary-foreground transition-colors duration-(--duration-fast)",
+        "inline-flex size-4 shrink-0 cursor-pointer items-center justify-center rounded-small border-line border-input bg-surface text-primary-foreground transition-colors duration-(--duration-fast)",
         "outline-none hover:border-muted-foreground focus-visible:focus-ring",
         "data-checked:border-primary data-checked:bg-primary data-indeterminate:border-primary data-indeterminate:bg-primary",
         "aria-invalid:border-danger-subtle-foreground data-disabled:cursor-not-allowed data-disabled:opacity-50",

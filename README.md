@@ -15,7 +15,7 @@ Live site: https://fine-design.qeqx.chatgpt.site
 
 ```
 ┌─ status ──────────────────────────────────────────────────────────────┐
-│  built     tokens · 42 components · 7 blocks · docs site · tests      │
+│  built     3 presets · 42 components · 7 blocks · docs site · tests   │
 │  live      shadcn registry · llms.txt · agent plugin                  │
 └───────────────────────────────────────────────────────────────────────┘
 ```
@@ -23,14 +23,14 @@ Live site: https://fine-design.qeqx.chatgpt.site
 ## How it fits together
 
 ```
- scripts/tokens.mjs ──▶ styles/fine.css ──▶ components/ui/*.tsx ──▶ registry.json ──▶ public/r/*.json
-  one source of          CSS variables:      Base UI + cva +         shadcn build       npx shadcn add
-  truth; fails on        light · dark · OS   Motion tiers;                              <site>/r/<name>.json
-  any AA miss            + Tailwind @theme   semantic tokens only
-        │
-        ├──▶ styles/tokens.json   machine-readable values + contrast report
-        └──▶ lib/motion.ts        spring tiers for Motion
+ scripts/presets/*.mjs ──▶ scripts/tokens.mjs ──▶ styles/fine.css (Ledger) ─┐
+  appearance: one file      OKLCH math, contrast    styles/presets/<n>.css   ├─▶ components/ui/*.tsx ──▶ registry.json ──▶ public/r/*.json
+  per preset (values        gate per preset,        styles/presets.css       │    Base UI + cva + Motion    shadcn build       npx shadcn add
+  only)                     fails on any AA miss    styles/tokens.json       │    tiers; tokens only                           <site>/r/<name>.json
+                                                    lib/motion.ts ───────────┘
 ```
+
+Behavior (Base UI roles, keyboard, focus, validation, motion tiers, reduced motion) lives in the components and is the same in every preset. Appearance (colors, fonts, weights, radii, type scale, control sizes, padding, border width, shadows) lives in presets.
 
 Agents: read [AGENTS.md](AGENTS.md) (using and changing the system) and `/llms.txt` on the docs site (per-item index), or install the plugin below.
 
@@ -48,51 +48,66 @@ Agents: read [AGENTS.md](AGENTS.md) (using and changing the system) and `/llms.t
 
 ## Install from the registry
 
+Install a theme once, then components. Components never re-skin a project.
+
 ```bash
+npx shadcn@latest add https://fine-design.qeqx.chatgpt.site/r/theme-ledger.json   # or theme-folio, theme-poster
 npx shadcn@latest add https://fine-design.qeqx.chatgpt.site/r/button.json
 ```
 
-- Each item brings its dependencies: other items, `fine-theme`, npm packages. `fine-theme` writes the tokens into your `globals.css`; it keeps Tailwind's own palette.
+- Every component depends on `fine-base`: the Tailwind mappings, the `figures`, `focus-ring` and `border-line` utilities, keyframes, and Ledger defaults in a cascade layer. Your `:root` and any installed theme win over those defaults, so a component added later does not change your look. A component installed without a theme renders in Ledger.
+- A theme writes values only (colors, fonts, weights, radii, type scale, control sizes, padding, border width, shadows) to `:root`, `.light`, `.dark` and the OS dark query. A second theme replaces the first. `fine-theme` is an alias of `theme-ledger`. It keeps Tailwind's own palette.
+- Load the fonts listed in the theme item's `meta.fonts` with next/font, passing an entry's `axes` or `weights` (as `axes` and `weight`) when it lists them: Folio's Newsreader and Poster's Bricolage Grotesque list `opsz`. Ledger needs Geist as `--font-geist-sans` and `--font-geist-mono`.
 - Project needs React 19, Tailwind v4 and the default `components.json` aliases. After `shadcn init`, add `--overwrite` so Fine's `button` and `utils` replace init's.
 - Items reference each other by absolute URL, taken from `REGISTRY_URL` at build time (default `http://localhost:4319`). For a deploy: `REGISTRY_URL=https://<host> npm run build`.
-- Every docs page shows its install line. `/r/registry.json` indexes all 54 items (42 ui, 7 blocks, 4 lib, `fine-theme`).
+- Every docs page shows its install line. `/r/registry.json` indexes all 58 items: 42 ui, 7 blocks, 4 lib, `fine-base`, and 4 theme items (`theme-ledger`, `theme-folio`, `theme-poster`, `fine-theme`).
 
 ## Develop
 
 ```bash
 npm install
 npm run dev              # docs on http://localhost:4318
-npm run tokens           # regenerate CSS, JSON, motion; exits 1 on contrast/gamut failure
-npm run registry:build   # registry.json + public/llms.txt, then shadcn build → public/r/*.json
+npm run tokens           # regenerate CSS, JSON, motion for every preset; exits 1 on a contrast, accent/danger hue or gamut failure
+npm run registry:build   # registry.json + public/llms.txt, then shadcn build → public/r/*.json (58 items)
 npm run build            # tokens → registry:build → static site in out/
 npm run serve            # serve out/ on PORT (default 4319)
 npm run typecheck
 npm run check:snippets   # typecheck every copyable docs snippet
 npm test                 # Playwright: keyboard, motion, axe; needs a build, uses installed Chrome
 npm run verify           # build → typecheck → snippets → Playwright
-npm run verify:install   # install select + dialog into a fresh Next app and check it; needs network and a prior build
+npm run verify:install   # install theme-folio, select and dialog into a fresh Next app, then fine-base alone, and check both; needs network and a prior build
 node scripts/screenshots.mts [states]   # every page at 375/1440, light/dark → screenshots/
 node scripts/motion-tour.mts            # motion video tour → screenshots/motion/ (needs ffmpeg)
 node scripts/showcase-video.mts        # 1080p60 promo reel of /showcase → screenshots/x/ (needs ffmpeg)
 node scripts/render-film.mts           # deterministic launch film of /film (virtual clock, 1080p60) → screenshots/x/fine-film.mp4; --from/--to/--stills for partials (build first; needs ffmpeg)
 ```
 
-## Theming
+## Presets
 
 ```
- ┌─ primitives ─────────────┐      ┌─ semantic (light / dark) ───────────────────────┐
- │ gray  blue  red  green   │ ───▶ │ background  surface  foreground  muted  border  │
- │ amber · 50 → 950 OKLCH   │      │ input  ring  primary  secondary  accent         │
- │ type · space · radius    │      │ success  warning  danger  info  (+ -foreground, │
- │ shadow · motion · z      │      │ -subtle, -subtle-foreground)  hover  active     │
- └──────────────────────────┘      └─────────────────────────────────────────────────┘
+ ┌─ behavior (same everywhere) ───────────┐      ┌─ appearance (a preset) ─────────────────────────────────┐
+ │ Base UI roles · keyboard · focus       │      │ colors  fonts  weights  radii  type scale               │
+ │ validation · motion tiers · reduced    │      │ control sizes  padding  border width  shadows           │
+ │ motion · contrast gate · token-only    │      │ ledger · folio · poster   (scripts/presets/<name>.mjs)  │
+ │ styling                                │      │                                                         │
+ └────────────────────────────────────────┘      └─────────────────────────────────────────────────────────┘
 ```
 
-- Edit `SEMANTIC` (or a ramp) in `scripts/tokens.mjs`, then `npm run tokens`. Every text/background pair must pass WCAG AA (4.5:1 text, 3:1 UI), and every color must fit in sRGB, or the script fails.
+| Preset | Direction | Take it for |
+|---|---|---|
+| Ledger | Achromatic, dense, flat at rest, ink chrome with one cobalt accent | Dashboards, admin and finance tools |
+| Folio | Editorial, set for reading: warm paper, serif titles, one quiet aubergine accent | Docs, publications, content-led pages |
+| Poster | Loud, large type, strong contrast: a flat hot magenta for the main action and the accent, hard shadows | Launches, campaigns, marketing pages |
+
+The table states each preset's intent. Exact values are in `scripts/presets/<name>.mjs` and `styles/tokens.json`.
+
+- Components use semantic and preset utilities only: `bg-primary`, `text-muted-foreground`, `border-line`, `rounded-control`, `h-control-md`, `px-pad-field-md`, `font-label`. The token contract table is in [AGENTS.md](AGENTS.md#tokens). The docs site removes Tailwind's default palette, so `bg-blue-500` does not exist there (an installed project keeps its palette).
+- Switching: in a project, install the other theme. In the docs, the Preset select in the sidebar sets `data-preset` on `<html>`; no attribute means Ledger.
 - Dark mode: `.dark` or `.light` on `<html>` (or any subtree). Without either class, the OS setting decides.
-- Components use semantic tokens only. The docs site removes Tailwind's default palette, so `bg-blue-500` does not exist there (an installed project keeps its palette); use `bg-primary`, `text-muted-foreground`, `border-input`.
-- Chrome is ink: the primary button and the focus ring are near-black (near-white in dark). `accent` (cobalt) marks the main data element only: a chart's current series, a selected value. No shadows on things at rest.
-- Money, counts, IDs and addresses take `figures` (Geist Mono, tabular digits). Labels and body stay in Geist, sentence case.
+- Making a preset: copy `scripts/presets/ledger.mjs` to `scripts/presets/<name>.mjs`, add its font loaders to `site/presets.ts`, run `npm run tokens`. Every text/background pair must pass WCAG AA (4.5:1 text, 3:1 UI), every color must fit in sRGB, and the accent (and a chromatic primary) must sit 40 degrees or more from danger in hue so it never reads as an error, or the script fails. `npm run build` then produces `theme-<name>`.
+- Before building a new site or screen, settle the direction (audience, content, typography, palette, composition, imagery, interaction character), pick the closest preset or derive one, then build with Fine components. A small edit inside an existing screen follows that screen.
+- Ledger's rules: ink chrome, `accent` (cobalt) on the main data element only, `figures` (Geist Mono, tabular digits) on money, counts, IDs and addresses, no shadows on things at rest, no taglines or secondary labels.
+- Forms show a hint under any input with a rule or a format: `FieldDescription` inside `Field`, linked to the input through `aria-describedby`.
 
 ## Motion
 
@@ -130,11 +145,11 @@ Still static: Alert, Badge, the Navbar wordmark, a Tag outside a `TagList`, and 
  │  └─ blocks/        compositions of components/ui only: auth-form · hero ·
  │                     feature-grid · pricing · faq · footer · dashboard-shell
  ├─ lib/              utils (cn) · popup · fluid-hover · motion (generated)
- ├─ styles/           fine.css · tokens.json (generated)
- ├─ scripts/          tokens · registry · check-snippets · serve · screenshots · motion-tour
- ├─ site/             docs-only code: nav, examples/<slug>.tsx, chrome
+ ├─ styles/           fine.css · presets/<name>.css · presets.css · tokens.json (generated)
+ ├─ scripts/          tokens · presets/<name>.mjs · registry · verify-install · check-snippets · serve · screenshots · motion-tour
+ ├─ site/             docs-only code: nav, examples/<slug>.tsx, presets.ts, preset-switch, chrome
  ├─ app/              docs routes: /tokens · /components/[slug] · /blocks/[slug]
- ├─ tests/            keyboard · motion · a11y (Playwright, against out/)
+ ├─ tests/            keyboard · motion · a11y (224 Playwright tests, against out/)
  ├─ plugin/           Claude Code plugin: skills/fine-design (also usable in Codex) + .mcp.json
  ├─ .claude-plugin/   marketplace.json for `/plugin marketplace add`
  └─ registry.json · public/r/ · public/llms.txt   generated by registry:build
@@ -142,7 +157,7 @@ Still static: Alert, Badge, the Navbar wordmark, a Tag outside a `TagList`, and 
 
 ## Adding a component
 
-1. Write `components/ui/<name>.tsx`: Base UI primitive underneath, `cva` for `variant`/`size`, semantic tokens only, `focus-visible:focus-ring`.
+1. Write `components/ui/<name>.tsx`: Base UI primitive underneath, `cva` for `variant`/`size`, semantic and preset utilities only, `focus-visible:focus-ring`.
 2. Motion, if any, comes from a source animation mapped onto `spring.<tier>`, or is the one change the user needs to notice. Static is fine.
 3. Add `site/examples/<name>.tsx`. Each exported function is one live example, and its source is the copyable code.
 4. Add the entry to `site/nav.ts`, and its category and one-line description to `UI` in `scripts/registry.mjs` (the build fails if either is missing).
@@ -157,7 +172,7 @@ Full notices and licenses: [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md). Fin
 | [Fluid Functionalism](https://github.com/mickadesign/fluid-functionalism) | MIT | motion tiers, hover highlight, button press geometry, spinner, icon stroke hover |
 | [Rare UI](https://rareui.com) | MIT + Commons Clause + Attribution | expressive tier: the FAQ reply bubble's SEND spring (visualDuration 0.42, bounce 0.28); the hero's falling-slips moment takes its idea from Gravity Letters (idea only, no code) |
 | [easyui](https://easyui.site) | MIT | Pagination active-page slide: SlidePagination's shared-layoutId technique, rewritten onto our tokens |
-| [taste-skill](https://github.com/Leonxlnx/taste-skill) | MIT | art direction: the "achromatic ledger" app style (ink chrome, mono figures, 6/8 radius) |
+| [taste-skill](https://github.com/Leonxlnx/taste-skill) | MIT | art direction: the Ledger preset's "achromatic ledger" style (ink chrome, mono figures, 6/8 radius) |
 | [Base UI](https://github.com/mui/base-ui) | MIT | primitives |
 
 The digit roll, tag removal, slider glide, avatar fade and theme crossfade are Fine's own and have no source to credit.

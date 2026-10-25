@@ -39,7 +39,7 @@ function Accordion({ className, children, ...props }: ComponentProps<typeof Acco
 }
 
 function AccordionItem({ className, ...props }: ComponentProps<typeof AccordionPrimitive.Item>) {
-  return <AccordionPrimitive.Item className={cn("border-b border-border", className)} {...props} />
+  return <AccordionPrimitive.Item className={cn("border-b-line border-border", className)} {...props} />
 }
 
 function AccordionTrigger({ className, children, ...props }: ComponentProps<typeof AccordionPrimitive.Trigger>) {
@@ -48,7 +48,7 @@ function AccordionTrigger({ className, children, ...props }: ComponentProps<type
       <AccordionPrimitive.Trigger
         data-fluid-item
         className={cn(
-          "group relative -mx-2 flex h-10 flex-1 cursor-pointer items-center justify-between gap-4 rounded-control px-2 text-left text-sm font-medium text-muted-foreground outline-none",
+          "group relative -mx-2 flex h-control-lg flex-1 cursor-pointer items-center justify-between gap-4 rounded-control px-2 text-left text-sm font-label text-muted-foreground outline-none",
           "transition-[color] duration-(--duration-fast) hover:text-foreground focus-visible:text-foreground focus-visible:focus-ring data-panel-open:text-foreground data-disabled:pointer-events-none data-disabled:opacity-50",
           className,
         )}

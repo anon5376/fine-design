@@ -1,8 +1,23 @@
+import type { ReactNode } from "react"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Heading } from "@/components/ui/heading"
 import { Container, Stack } from "@/components/ui/layout"
 
-const questions = [
+type FaqItem = {
+  /** Unique key; what `defaultValue` refers to. */
+  value: string
+  question: ReactNode
+  answer: ReactNode
+}
+
+type FaqProps = {
+  heading?: ReactNode
+  items?: FaqItem[]
+  /** Values of the items open on first render. Defaults to the first item. */
+  defaultValue?: string[]
+}
+
+const questions: FaqItem[] = [
   {
     value: "payouts",
     question: "When do payouts arrive?",
@@ -35,15 +50,15 @@ const questions = [
   },
 ]
 
-export function Faq() {
+export function Faq({ heading = "Questions", items = questions, defaultValue = items.slice(0, 1).map(q => q.value) }: FaqProps) {
   return (
     <Container render={<section />} size="sm" className="py-16 md:py-24">
       <Stack gap="lg">
         <Heading level={2} size="lg">
-          Questions
+          {heading}
         </Heading>
-        <Accordion defaultValue={["payouts"]}>
-          {questions.map(q => (
+        <Accordion defaultValue={defaultValue}>
+          {items.map(q => (
             <AccordionItem key={q.value} value={q.value}>
               <AccordionTrigger>{q.question}</AccordionTrigger>
               <AccordionContent>{q.answer}</AccordionContent>
@@ -54,3 +69,5 @@ export function Faq() {
     </Container>
   )
 }
+
+export type { FaqItem, FaqProps }

@@ -39,7 +39,7 @@ function Tooltip({ children, content, side = "top", delay, className }: TooltipP
         <TooltipPrimitive.Positioner side={side} sideOffset={6} className="z-(--z-tooltip)">
           <TooltipPrimitive.Popup
             className={cn(
-              "rounded-control bg-primary px-2 py-1 text-xs font-medium text-primary-foreground",
+              "rounded-control bg-primary px-2 py-1 text-xs font-label text-primary-foreground",
               tooltipMotion,
               className,
             )}

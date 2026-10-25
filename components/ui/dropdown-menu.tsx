@@ -85,7 +85,7 @@ function DropdownMenuSubTrigger({ className, children, ...props }: ComponentProp
 
 /** Must sit inside a <DropdownMenuGroup>. */
 function DropdownMenuLabel({ className, ...props }: ComponentProps<typeof MenuPrimitive.GroupLabel>) {
-  return <MenuPrimitive.GroupLabel className={cn("px-2 pt-2 pb-1 text-xs font-medium text-muted-foreground", className)} {...props} />
+  return <MenuPrimitive.GroupLabel className={cn("px-2 pt-2 pb-1 text-xs font-label text-muted-foreground", className)} {...props} />
 }
 
 function DropdownMenuSeparator({ className, ...props }: ComponentProps<typeof Separator>) {

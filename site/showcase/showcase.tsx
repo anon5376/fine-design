@@ -25,7 +25,7 @@ import { NewTransferDialog } from "@/site/showcase/new-transfer-dialog"
 import { SidebarLinks } from "@/site/showcase/sidebar-links"
 import { TransfersCard, type View } from "@/site/showcase/transfers-card"
 
-const wordmark = "text-base font-semibold tracking-tight"
+const wordmark = "font-display text-base font-strong tracking-tight"
 const usd = { style: "currency", currency: "USD" } as const
 
 /** A payments app made only of Fine's components: every control here is live, which is also what the promo reel drives. */
@@ -105,7 +105,7 @@ export function Showcase() {
           </SidebarContent>
         </Sidebar>
         <Stack gap="none" className="min-w-0 flex-1">
-          <Stack render={<header />} direction="row" gap="sm" align="center" className="h-14 shrink-0 border-b border-border px-4 @3xl:px-6">
+          <Stack render={<header />} direction="row" gap="sm" align="center" className="h-14 shrink-0 border-b-line border-border px-4 @3xl:px-6">
             <Drawer open={menu} onOpenChange={setMenu} side="left">
               <DrawerTrigger render={<IconButton label="Open menu" className="-ml-2 @3xl:hidden" />}>
                 <Menu />
@@ -171,7 +171,7 @@ export function Showcase() {
                       <RefreshCw />
                     </IconButton>
                   )}
-                  <AnimatedNumber value={metric.value} format={usd} className={cn("text-2xl font-medium", metric.main && "text-accent")} />
+                  <AnimatedNumber value={metric.value} format={usd} className={cn("text-2xl font-title", metric.main && "text-accent")} />
                 </Card>
               ))}
             </Grid>
@@ -179,7 +179,7 @@ export function Showcase() {
           </Stack>
         </Stack>
       </Stack>
-      <footer className="flex h-12 shrink-0 items-center justify-center gap-4 border-t border-border px-4 md:px-6">
+      <footer className="flex h-12 shrink-0 items-center justify-center gap-4 border-t-line border-border px-4 md:px-6">
         <span className={wordmark}>fine</span>
         <span className="figures text-sm text-muted-foreground">github.com/anon5376/fine-design</span>
       </footer>
