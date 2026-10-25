@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Check } from "lucide-react"
+import { AnimatedNumber } from "@/components/ui/animated-number"
 import { Button } from "@/components/ui/button"
 import { Card, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Heading } from "@/components/ui/heading"
@@ -55,9 +56,11 @@ export function Pricing() {
                 <CardTitle>{plan.name}</CardTitle>
               </CardHeader>
               <Stack direction="row" gap="xs" align="baseline">
-                <Text render={<span />} className="figures text-3xl font-medium text-foreground">
-                  ${plan.price[billing]}
-                </Text>
+                <AnimatedNumber
+                  value={plan.price[billing]}
+                  format={{ style: "currency", currency: "USD", maximumFractionDigits: 0 }}
+                  className="text-3xl font-medium text-foreground"
+                />
                 <Text render={<span />} variant="muted">
                   per month
                 </Text>

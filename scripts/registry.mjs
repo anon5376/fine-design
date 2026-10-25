@@ -38,6 +38,7 @@ const UI = {
   avatar: ["display", "User image with an initials fallback."],
   tag: ["display", "Chip for a chosen value or filter, with an optional remove button."],
   kbd: ["display", "Keyboard key hint."],
+  "animated-number": ["display", "Figure whose changed digits roll to the new value, in the direction it moved."],
   table: ["display", "Table with header, body, row and cell styling."],
   accordion: ["display", "Collapsible sections, one or several open at a time."],
   skeleton: ["feedback", "Pulsing placeholder for content that is loading."],

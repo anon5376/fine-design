@@ -5,7 +5,7 @@ description: Use when building or restyling React UI in a project that uses Fine
 
 # Fine
 
-React design system as a shadcn registry. 41 components, 7 blocks, 4 lib files, `fine-theme`. Site: https://fine-design.qeqx.chatgpt.site
+React design system as a shadcn registry. 42 components, 7 blocks, 4 lib files, `fine-theme`. Site: https://fine-design.qeqx.chatgpt.site
 
 ## Setup
 
@@ -72,20 +72,21 @@ Blocks (`auth-form`, `hero`, `feature-grid`, `pricing`, `faq`, `footer`, `dashbo
 
 ## Motion
 
-Static is the default. Add motion only when a component already ships it or a source animation maps onto a tier. Alert, Badge, Tag, Slider thumb and the Navbar wordmark stay static: a state change there is read from the new label, and animating them is a regression.
+Static is the default. Add motion only when a component already ships it, a source animation maps onto a tier, or it is the one change the user needs to notice. Alert, Badge, the Navbar wordmark, a Tag outside `TagList`, and slider drag and key steps stay static: a state change there is read from the new label, and animating them is a regression.
 
 Pick the tier by what moves; the bigger the thing, the slower the tier.
 
 | Tier | Enter | Exit | Use |
 |---|---|---|---|
-| fast | 80ms | 60ms | hover, focus, check and radio marks, tooltips, hover highlight |
-| moderate | 160ms | 120ms | select, combobox, menu and popover enters, drawers, tab and pagination indicators, switch thumb |
+| fast | 80ms | 60ms | hover, focus, check and radio marks, tooltips, hover highlight, avatar image fade, tag removal exit |
+| moderate | 160ms | 120ms | select, combobox, menu and popover enters, drawers, tab and pagination indicators, switch thumb, rolling digits, tag sibling glide, slider track-press glide |
 | slow | 240ms, bounce 0.12 | 160ms | dialogs, command palette |
 | expressive | 420ms visual, bounce 0.28 | 160ms | feedback arriving: toasts and the hero slips. The one overshoot |
 
 - Motion JS: enter on `spring.<tier>`, exit on `spring.<tier>.exit` with `easing.exit`, both from `@/lib/motion`. CSS: `duration-(--duration-<tier>)` with `ease-spring-<tier>` to enter; `duration-(--duration-<tier>-exit)` with `ease-exit` to leave. Use these tokens in place of invented durations or bounce values.
 - Lists, menus and nav share one hover highlight: `useFluidHover` and `<FluidHighlight>` from `@/lib/fluid-hover`. Popups use `popupSurface`, `popupMotion`, `popupItem` from `@/lib/popup`.
-- Animate transform and opacity. Width moves only where size is the information (progress fill, switch thumb, highlight).
+- Animate transform and opacity. Width moves only where size is the information (progress fill, switch thumb, highlight, a figure gaining a digit, slider position).
+- Fine's own (original): `AnimatedNumber` digit roll (also the pricing price), `TagList` removal exit and sibling glide, `Slider` track-press glide, `Avatar` image fade. Use `AnimatedNumber` for a figure that changes while on screen; wrap removable `Tag`s in `TagList`. Never add loops or page-load entrances.
 - Reduced motion drops travel and keeps fades: `MotionConfig reducedMotion="user"` for Motion, `motion-reduce:` for CSS.
 
 ## Accessibility contracts

@@ -1,6 +1,6 @@
 # Fine
 
-React design system: Base UI primitives, Tailwind v4 tokens, Motion springs, shipped as a shadcn registry. 41 components, 7 blocks, 4 lib files, 1 theme. The look is a decided "achromatic ledger"; Using and Changing below say what that rules out.
+React design system: Base UI primitives, Tailwind v4 tokens, Motion springs, shipped as a shadcn registry. 42 components, 7 blocks, 4 lib files, 1 theme. The look is a decided "achromatic ledger"; Using and Changing below say what that rules out.
 
 Reached through a pointer, not loaded: `public/llms.txt` (generated; per-item descriptions, docs and registry URLs), `registry.json` `meta` (exports and variants per item), `styles/tokens.json` (values, contrast report), `scripts/tokens.mjs` (token source).
 
@@ -65,19 +65,33 @@ Pick by what moves: the bigger the thing, the slower the tier.
 
 | Tier | Enter | Exit | Use |
 |---|---|---|---|
-| fast | 80ms | 60ms | hover, focus, check/radio marks, tooltips, hover highlight |
-| moderate | 160ms | 120ms | select/combobox/menu/popover enters, drawers, tabs and pagination indicators, switch thumb |
+| fast | 80ms | 60ms | hover, focus, check/radio marks, tooltips, hover highlight, avatar image fade-in, tag removal exit |
+| moderate | 160ms | 120ms | select/combobox/menu/popover enters, drawers, tabs and pagination indicators, switch thumb, rolling digits, tag sibling glide, slider track-press glide, theme crossfade |
 | slow | 240ms, bounce 0.12 | 160ms | dialogs, command palette |
 | expressive | 420ms visual, bounce 0.28 (settles in about 810ms) | 160ms | feedback arriving: toasts and the hero slips. The one visible overshoot |
 
 - Motion JS: enter on `spring.<tier>`, exit on `spring.<tier>.exit` with `easing.exit`, both from `@/lib/motion`. CSS: `duration-(--duration-<tier>)` with `ease-spring-<tier>` to enter, `duration-(--duration-<tier>-exit)` with `ease-exit` to leave. Anything else transitions on `--ease-enter`.
 - Share the glide: lists, menus and nav use `useFluidHover` and `<FluidHighlight>` from `@/lib/fluid-hover`; popups use `popupSurface`, `popupMotion`, `popupItem` from `@/lib/popup`.
-- Animate transform and opacity. Width moves only where size is the information (progress fill, switch thumb, highlight).
+- Animate transform and opacity. Width moves only where size is the information (progress fill, switch thumb, highlight, a figure gaining a digit, slider position).
 - Reduced motion drops travel and keeps fades; Motion goes through `MotionConfig reducedMotion="user"`, CSS through `motion-reduce:`.
 
 ### Deliberately static
 
-Alert, Badge, Tag, Slider thumb, Navbar wordmark. A state change there is read from the new label or content. Adding motion to these is a regression, not polish.
+Alert, Badge, Navbar wordmark, a Tag outside a `TagList`, Slider drag and keyboard steps, the dashboard-shell metrics (static strings; bind them to `AnimatedNumber` if they ever update). A state change there is read from the new label or content. Adding motion to these is a regression, not polish.
+
+### Fine's own animations
+
+Original to Fine, not borrowed from a source. Each animates only the change the user needs to notice, on the tiers above, with no loops and no entrance on page load.
+
+| Animation | Where | Moves | Tier | Reduced motion |
+|---|---|---|---|---|
+| Digit roll | `AnimatedNumber`, pricing block price | Changed digit slides a line in the direction the value moved; added or removed digits and separators grow or shrink | moderate enter, moderate exit tween; unchanged digits stay put | fade only, no travel, no width, instant exit |
+| Tag removal | `TagList` + `Tag` | Leaving tag fades and scales to 0.5, then is inert; siblings glide into the gap (position only) | fast exit; moderate glide | fade only, no scale, siblings jump |
+| Slider track press | `Slider` | Thumb and range glide to the pressed spot; drag and keys stay instant | moderate (CSS, `data-glide`) | jump |
+| Avatar image arrives | `Avatar` | Image fades in over the initials; a cached image shows at once | fast, `ease-enter` | fade kept |
+| Theme switch | docs `ThemeToggle` | Page crossfades through a View Transition (`::view-transition-*(root)` in `app/globals.css`) | moderate | instant switch |
+
+Screen readers get the final value or name on the same frame: `AnimatedNumber` keeps an sr-only copy of the formatted value and aria-hides the rolling glyphs; the leaving tag is `inert`; the avatar name moves to the image at once.
 
 ### Accessibility contracts
 
@@ -107,7 +121,7 @@ Never hand-edit `styles/fine.css`, `styles/tokens.json`, `lib/motion.ts`, `regis
 ### Add a component, end to end
 
 1. `components/ui/<name>.tsx`: Base UI primitive underneath, `cva` for `variant` and `size`, semantic tokens only, `focus-visible:focus-ring`, `"use client"` when it uses hooks. Copy the shape of `button.tsx` or `badge.tsx`. A new file per feature; no growing existing files.
-2. Motion only if a source animation maps onto a tier (see Motion). Otherwise static, and say so in the doc comment, as `badge.tsx` does.
+2. Motion only if a source animation maps onto a tier or it is the change the user needs to notice (see Motion). Otherwise static, and say so in the doc comment, as `badge.tsx` does.
 3. `site/examples/<name>.tsx`: each exported function is one live example and its source is the copyable snippet. Imports must be complete; module-level helpers it references are pulled in automatically.
 4. `site/nav.ts`: add the entry (slug, title, `load`). Blocks also take `exportName` and `frame`.
 5. `scripts/registry.mjs`: add the category and one-line description in `UI` (or `BLOCKS`). The script throws when a file has no entry or no nav.ts entry, imports an unknown `@/` path, or imports a package missing from `package.json`.
@@ -119,8 +133,8 @@ Never hand-edit `styles/fine.css`, `styles/tokens.json`, `lib/motion.ts`, `regis
 
 ### Motion rules and sources
 
-- Tiers come from Fluid Functionalism (MIT); expressive is Rare UI's SEND spring. easyui's SlidePagination technique drives the pagination indicator. Credits table is in `README.md`.
-- Port a source animation onto the nearest tier. Do not invent durations or bounce values in a component.
+- Tiers come from Fluid Functionalism (MIT); expressive is Rare UI's SEND spring. easyui's SlidePagination technique drives the pagination indicator. Credits table is in `README.md`. The animations in Fine's own animations above are original, not borrowed; do not credit them.
+- Port a source animation onto the nearest tier. Do not invent durations or bounce values in a component. A new original animation is allowed only for a change the user needs to notice; list it in Fine's own animations, state tier and reduced-motion behaviour in its one doc comment, and never block input, delay content or change an accessible name mid-animation.
 - `ease-spring-expressive` is the settle curve of the same underdamped spring Motion runs, generated in `tokens.mjs`.
 - `tests/motion.spec.ts` samples computed styles per frame to prove each animation uses its token and that movement becomes a jump under reduced motion. Add a case for any new animation.
 
@@ -135,7 +149,7 @@ Ink chrome (primary, focus ring), grey secondary, cobalt accent on a screen's ma
 | `npm run tokens` | Contrast pairs and sRGB gamut; regenerates CSS, JSON, motion |
 | `npm run typecheck` | The repo compiles |
 | `npm run check:snippets` | Every copyable docs snippet compiles as its own file |
-| `npm run build` | tokens, registry (53 items) and the static export in `out/` |
+| `npm run build` | tokens, registry (54 items) and the static export in `out/` |
 | `npm test` | Keyboard paths, per-frame motion, axe, against `out/` on port 4329 (build first) |
 | `npm run verify` | build, typecheck, snippets, Playwright in one go |
 | `npm run verify:install` | Registry items install into a fresh Next app and render with fine's tokens and motion; needs network and a prior build (temp app path is printed); after a deploy built with `REGISTRY_URL=https://…`, it installs from the live registry instead |

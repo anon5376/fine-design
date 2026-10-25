@@ -29,6 +29,7 @@ export const components: Entry[] = [
   { slug: "avatar", title: "Avatar", load: () => import("@/site/examples/avatar") },
   { slug: "tag", title: "Tag", load: () => import("@/site/examples/tag") },
   { slug: "kbd", title: "Kbd", load: () => import("@/site/examples/kbd") },
+  { slug: "animated-number", title: "AnimatedNumber", load: () => import("@/site/examples/animated-number") },
   { slug: "table", title: "Table", load: () => import("@/site/examples/table") },
   { slug: "skeleton", title: "Skeleton", load: () => import("@/site/examples/skeleton") },
   { slug: "progress", title: "Progress", load: () => import("@/site/examples/progress") },

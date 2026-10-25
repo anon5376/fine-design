@@ -3,3 +3,13 @@
 
 @source "../components";
 @source "../site";
+
+/* Theme switch: the root crossfade runs on the moderate tier. The page underneath is already the new theme, so clicks pass through. */
+::view-transition {
+  pointer-events: none;
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--duration-moderate);
+  animation-timing-function: var(--ease-spring-moderate);
+}

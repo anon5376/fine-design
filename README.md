@@ -15,7 +15,7 @@ Live site: https://fine-design.qeqx.chatgpt.site
 
 ```
 ┌─ status ──────────────────────────────────────────────────────────────┐
-│  built     tokens · 41 components · 7 blocks · docs site · tests      │
+│  built     tokens · 42 components · 7 blocks · docs site · tests      │
 │  live      shadcn registry · llms.txt · agent plugin                  │
 └───────────────────────────────────────────────────────────────────────┘
 ```
@@ -55,7 +55,7 @@ npx shadcn@latest add https://fine-design.qeqx.chatgpt.site/r/button.json
 - Each item brings its dependencies: other items, `fine-theme`, npm packages. `fine-theme` writes the tokens into your `globals.css`; it keeps Tailwind's own palette.
 - Project needs React 19, Tailwind v4 and the default `components.json` aliases. After `shadcn init`, add `--overwrite` so Fine's `button` and `utils` replace init's.
 - Items reference each other by absolute URL, taken from `REGISTRY_URL` at build time (default `http://localhost:4319`). For a deploy: `REGISTRY_URL=https://<host> npm run build`.
-- Every docs page shows its install line. `/r/registry.json` indexes all 53 items (41 ui, 7 blocks, 4 lib, `fine-theme`).
+- Every docs page shows its install line. `/r/registry.json` indexes all 54 items (42 ui, 7 blocks, 4 lib, `fine-theme`).
 
 ## Develop
 
@@ -103,7 +103,21 @@ node scripts/motion-tour.mts            # motion video tour → screenshots/moti
  expressive   420ms · bounce 0.28 (≈810ms)   160ms        toasts: feedback arriving, the one visible overshoot
 ```
 
-Enter on `spring.<tier>`, exit on `spring.<tier>.exit` (`lib/motion.ts`); expressive is RareUI's visual duration (the CSS curve runs the full ≈810ms settle) and exits on slow's tween, and popups leave on fast's exit. CSS uses `duration-(--duration-<tier>)` with `ease-spring-<tier>` to enter and `duration-<tier>-exit` with `ease-exit` to leave. Every other transition defaults to `--ease-enter`, and Motion tweens take `easing.enter` and `easing.exit`. Lists, menus and nav share one hover highlight that glides between items (`useFluidHover` + `<FluidHighlight>` in `lib/fluid-hover.tsx`). Prefer transform and opacity; width is animated only where the size is the information (progress fill, switch thumb, highlight). Wrap apps in `<MotionConfig reducedMotion="user">`; with reduced motion on, movement is dropped and fades remain.
+Enter on `spring.<tier>`, exit on `spring.<tier>.exit` (`lib/motion.ts`); expressive is RareUI's visual duration (the CSS curve runs the full ≈810ms settle) and exits on slow's tween, and popups leave on fast's exit. CSS uses `duration-(--duration-<tier>)` with `ease-spring-<tier>` to enter and `duration-<tier>-exit` with `ease-exit` to leave. Every other transition defaults to `--ease-enter`, and Motion tweens take `easing.enter` and `easing.exit`. Lists, menus and nav share one hover highlight that glides between items (`useFluidHover` + `<FluidHighlight>` in `lib/fluid-hover.tsx`). Prefer transform and opacity; width is animated only where the size is the information (progress fill, switch thumb, highlight, a figure gaining a digit, slider position). Wrap apps in `<MotionConfig reducedMotion="user">`; with reduced motion on, movement is dropped and fades remain.
+
+Fine's own animations (original, not borrowed) animate only a change the user needs to notice, on the same tiers, with no loops and no entrance on page load. Reduced motion keeps at most a fade, and the final value or name is in the accessibility tree on the click.
+
+```
+ animation            where                     tier                           reduced motion
+ ──────────────────   ───────────────────────   ────────────────────────────   ───────────────────
+ digit roll           AnimatedNumber, pricing   moderate (exit 120ms tween)    fade only
+ tag removal          TagList + Tag             fast exit; siblings moderate   fade, siblings jump
+ slider track press   Slider                    moderate (CSS)                 jump
+ avatar image fade    Avatar                    fast                           fade kept
+ theme crossfade      docs ThemeToggle          moderate (view transition)     instant
+```
+
+Still static: Alert, Badge, the Navbar wordmark, a Tag outside a `TagList`, and slider drag and keyboard steps (a drag must track the pointer exactly).
 
 ## Layout
 
@@ -127,7 +141,7 @@ Enter on `spring.<tier>`, exit on `spring.<tier>.exit` (`lib/motion.ts`); expres
 ## Adding a component
 
 1. Write `components/ui/<name>.tsx`: Base UI primitive underneath, `cva` for `variant`/`size`, semantic tokens only, `focus-visible:focus-ring`.
-2. Motion, if any, comes from a source animation mapped onto `spring.<tier>`. Static is fine.
+2. Motion, if any, comes from a source animation mapped onto `spring.<tier>`, or is the one change the user needs to notice. Static is fine.
 3. Add `site/examples/<name>.tsx`. Each exported function is one live example, and its source is the copyable code.
 4. Add the entry to `site/nav.ts`, and its category and one-line description to `UI` in `scripts/registry.mjs` (the build fails if either is missing).
 5. Run `npm run typecheck && npm run check:snippets && npm run build && npm test`.
@@ -143,3 +157,5 @@ Full notices and licenses: [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md). Fin
 | [easyui](https://easyui.site) | MIT | Pagination active-page slide: SlidePagination's shared-layoutId technique, rewritten onto our tokens |
 | [taste-skill](https://github.com/Leonxlnx/taste-skill) | MIT | art direction: the "achromatic ledger" app style (ink chrome, mono figures, 6/8 radius) |
 | [Base UI](https://github.com/mui/base-ui) | MIT | primitives |
+
+The digit roll, tag removal, slider glide, avatar fade and theme crossfade are Fine's own and have no source to credit.

@@ -1,5 +1,6 @@
 // Records the motion in the docs as video (npm run build first; needs ffmpeg for the .mp4).
 //   node scripts/motion-tour.mts   → screenshots/motion/tour-1x.mp4 and tour-0.25x.mp4
+//   BASE_URL=https://<deployed docs> node scripts/motion-tour.mts   records the deployed site instead of out/
 // Frames come from Chrome's CDP screencast (it keeps delivering across page.goto), which only
 // emits on paint; each frame is held until the next one's timestamp via an ffmpeg concat list.
 // The slowed pass sets Chrome's animation playback rate, which slows CSS transitions and
@@ -9,11 +10,11 @@ import { mkdirSync, rmSync, writeFileSync } from "node:fs"
 import { chromium, type CDPSession, type Page } from "@playwright/test"
 
 const port = 4349
-const base = `http://localhost:${port}`
+const base = process.env.BASE_URL?.replace(/\/$/, "") ?? `http://localhost:${port}`
 const out = "screenshots/motion"
 const ffmpeg = "/opt/homebrew/bin/ffmpeg"
 const maxGap = 8 // seconds; a static page is still one frame
-const server = spawn("node", ["scripts/serve.mjs"], { env: { ...process.env, PORT: String(port) }, stdio: "ignore" })
+const server = process.env.BASE_URL ? null : spawn("node", ["scripts/serve.mjs"], { env: { ...process.env, PORT: String(port) }, stdio: "ignore" })
 await new Promise(r => setTimeout(r, 500))
 const browser = await chromium.launch({ channel: "chrome" })
 
@@ -42,7 +43,9 @@ function encode(frames: { data: Buffer; time: number }[], dir: string, mp4: stri
   list.push(`file '${String(frames.length - 1).padStart(5, "0")}.jpg'`) // concat drops the last duration without a repeat
   writeFileSync(`${dir}/list.txt`, list.join("\n") + "\n")
   execFileSync(ffmpeg, ["-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", `${dir}/list.txt`,
-    "-vf", "fps=30,scale=trunc(iw/2)*2:trunc(ih/2)*2", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "20", mp4])
+    // JPEG frames are full range; social players expect limited-range yuv420p and the index up front.
+    "-vf", "fps=30,scale=trunc(iw/2)*2:trunc(ih/2)*2:in_range=full:out_range=tv,format=yuv420p", "-c:v", "libx264", "-color_range", "tv",
+    "-crf", "20", "-movflags", "+faststart", mp4])
 }
 
 async function open(page: Page, path: string) {
@@ -144,6 +147,30 @@ async function tour(page: Page, beat: number) {
   await page.keyboard.press("Escape")
   await pause()
 
+  await open(page, "/components/animated-number/")
+  for (const name of ["Add 125", "Add 125", "Subtract 125"]) {
+    await page.getByRole("button", { name }).first().click()
+    await pause()
+  }
+  await open(page, "/blocks/pricing/")
+  for (const name of ["Monthly", "Yearly"]) {
+    await page.getByRole("tab", { name }).first().click()
+    await pause()
+  }
+
+  await open(page, "/components/tag/")
+  for (let i = 0; i < 2; i++) {
+    await page.locator("main [data-tag-remove]").first().click()
+    await pause()
+  }
+
+  await open(page, "/components/slider/")
+  const track = (await page.locator("main .h-1.bg-secondary").first().boundingBox())!
+  for (const at of [0.85, 0.2]) {
+    await page.mouse.click(track.x + track.width * at, track.y + track.height / 2)
+    await pause()
+  }
+
   await open(page, "/components/progress/")
   await pause(4)
 
@@ -155,6 +182,13 @@ async function tour(page: Page, beat: number) {
   await pause(2)
   await play.click()
   await pause(2)
+
+  // Theme cycles system → light → dark → system; light and dark crossfade.
+  await open(page, "/")
+  for (let i = 0; i < 3; i++) {
+    await page.getByRole("button", { name: /^Theme:/ }).click()
+    await pause(1.5)
+  }
 }
 
 mkdirSync(out, { recursive: true })
@@ -175,6 +209,6 @@ try {
   }
 } finally {
   await browser.close()
-  server.kill()
+  server?.kill()
 }
 console.log("done")

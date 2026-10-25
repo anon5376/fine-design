@@ -1,11 +1,6 @@
-"use client"
-
-import { useEffect, useState } from "react"
 import { Code } from "@/site/example"
 
-/** shadcn install line pointing at this site's own /r/ registry. */
+/** shadcn install line pointing at the registry this build was made for (REGISTRY_URL). */
 export function InstallCommand({ name }: { name: string }) {
-  const [origin, setOrigin] = useState("")
-  useEffect(() => setOrigin(window.location.origin), [])
-  return <Code code={`npx shadcn@latest add ${origin}/r/${name}.json`} />
+  return <Code code={`npx shadcn@latest add ${process.env.REGISTRY_URL}/r/${name}.json`} />
 }
