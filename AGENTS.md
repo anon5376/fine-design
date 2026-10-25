@@ -166,7 +166,7 @@ components/ui/*.tsx      one file per component; installs to the same path
 components/blocks/*.tsx  compositions of components/ui only
 lib/                     utils (cn) · popup · fluid-hover · motion (generated)
 styles/                  fine.css (Ledger and the Tailwind mapping), presets/<name>.css, presets.css, tokens.json (all generated)
-scripts/                 tokens.mjs · presets/<name>.mjs (one per preset) · registry.mjs · verify-install.mts · check-snippets.mts · serve.mjs · screenshots.mts · motion-tour.mts
+scripts/                 tokens.mjs · presets/<name>.mjs (one per preset) · registry.mjs · verify-install.mts · check-snippets.mts · check-classes.mts · serve.mjs · screenshots.mts · motion-tour.mts
 site/                    docs-only: nav.ts, examples/<slug>.tsx, presets.ts (fonts per preset), preset-switch.tsx, source.ts, install-command.tsx, chrome
 app/                     docs routes: /, /tokens, /components/[slug], /blocks/[slug]
 tests/                   keyboard, motion, a11y specs against out/
@@ -183,7 +183,7 @@ Never hand-edit `styles/fine.css`, `styles/presets/`, `styles/presets.css`, `sty
 3. `site/examples/<name>.tsx`: each exported function is one live example and its source is the copyable snippet. Imports must be complete; module-level helpers it references are pulled in automatically.
 4. `site/nav.ts`: add the entry (slug, title, `load`). Blocks also take `exportName` and `frame`.
 5. `scripts/registry.mjs`: add the category and one-line description in `UI` (or `BLOCKS`). The script throws when a file has no entry or no nav.ts entry, imports an unknown `@/` path, or imports a package missing from `package.json`.
-6. `npm run typecheck && npm run check:snippets && npm run build`, then `npm test`.
+6. `npm run typecheck && npm run check:classes && npm run check:snippets && npm run build`, then `npm test`.
 
 ### Token pipeline
 
@@ -229,9 +229,10 @@ Match the file you are editing; comments are sparse and say why.
 | `npm run tokens` | Contrast pairs, the accent/danger hue gate and sRGB gamut for every preset; regenerates CSS, JSON, motion |
 | `npm run typecheck` | The repo compiles |
 | `npm run check:snippets` | Every copyable docs snippet compiles as its own file |
+| `npm run check:classes` | No class in `components/`, `site/` or `app/` bypasses the token contract: bare `border` widths, `font-medium`, `font-semibold`, `font-bold`, `rounded` and `rounded-xs` to `rounded-3xl`, and `h-7`, `h-9`, `h-10` in `components/`. Exceptions live in the script's allow-list, each with a reason |
 | `npm run build` | tokens, registry (58 items) and the static export in `out/` |
 | `npm test` | 224 tests: keyboard paths, per-frame motion, axe, against `out/` on port 4329 (build first) |
-| `npm run verify` | build, typecheck, snippets, Playwright in one go |
+| `npm run verify` | build, typecheck, classes, snippets, Playwright in one go |
 | `npm run verify:install` | `theme-folio`, then select and dialog, install into a fresh Next app and render with Folio's tokens and motion while the app's own `:root` values survive; a second phase installs `fine-base` alone and checks the Ledger defaults give way to the project in every color mode; needs network and a prior build (temp app path is printed); after a deploy built with `REGISTRY_URL=https://…`, it installs from the live registry instead |
 | `node scripts/screenshots.mts [states]` | Pages at 375 and 1440, light and dark, for a visual look |
 | `node scripts/motion-tour.mts` | Motion video tour (needs ffmpeg) |

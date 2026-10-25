@@ -9,10 +9,11 @@
     "registry:build": "node scripts/registry.mjs && shadcn build",
     "build": "npm run tokens && npm run registry:build && next build",
     "typecheck": "tsc --noEmit",
+    "check:classes": "node scripts/check-classes.mts",
     "check:snippets": "node scripts/check-snippets.mts",
     "serve": "node scripts/serve.mjs",
     "test": "playwright test",
-    "verify": "npm run build && npm run typecheck && npm run check:snippets && npm test",
+    "verify": "npm run build && npm run typecheck && npm run check:classes && npm run check:snippets && npm test",
     "verify:install": "node scripts/verify-install.mts"
   },
   "dependencies": {

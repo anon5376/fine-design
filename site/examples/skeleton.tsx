@@ -14,7 +14,7 @@ export function Row() {
 
 export function Card() {
   return (
-    <div aria-busy="true" className="grid w-full max-w-sm gap-3 rounded-container border border-border p-5">
+    <div aria-busy="true" className="grid w-full max-w-sm gap-3 rounded-container border-line border-border p-5">
       <Skeleton className="h-4 w-1/2" />
       <Skeleton className="h-8 w-2/3" />
       <Skeleton className="h-3 w-full" />

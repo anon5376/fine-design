@@ -16,7 +16,7 @@ const company = [
   { id: "settings", label: "Settings", icon: Settings },
 ]
 
-const wordmark = "text-base font-semibold tracking-tight"
+const wordmark = "text-base font-strong tracking-tight"
 
 function Items({ items, current, onSelect }: { items: typeof money | typeof company; current: string; onSelect: (id: string) => void }) {
   return items.map(item => (
@@ -35,7 +35,7 @@ function Items({ items, current, onSelect }: { items: typeof money | typeof comp
 export function Default() {
   const [current, setCurrent] = useState("transfers")
   return (
-    <Sidebar className="h-[30rem] rounded-container border">
+    <Sidebar className="h-[30rem] rounded-container border-line">
       <SidebarHeader>
         <span className={wordmark}>Ledgerly</span>
       </SidebarHeader>
@@ -61,7 +61,7 @@ export function Default() {
 export function Compact() {
   const [current, setCurrent] = useState("invoices")
   return (
-    <Sidebar size="sm" className="h-96 rounded-container border">
+    <Sidebar size="sm" className="h-96 rounded-container border-line">
       <SidebarHeader>
         <span className={wordmark}>Ledgerly</span>
       </SidebarHeader>

@@ -14,7 +14,7 @@ const links = [
 export function Default() {
   const [current, setCurrent] = useState("transfers")
   return (
-    <div className="w-full overflow-hidden rounded-container border">
+    <div className="w-full overflow-hidden rounded-container border-line">
       <Navbar
         brand={<NavbarBrand render={<a href="#home" />}>Ledgerly</NavbarBrand>}
         action={<Button size="sm">New transfer</Button>}

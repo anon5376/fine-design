@@ -1,29 +1,14 @@
 "use client"
 
-import { useSyncExternalStore } from "react"
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select"
+import { usePreset } from "@/site/use-preset"
 
 type Option = { id: string; label: string }
-
-// The attribute on <html> is the state (the inline script in app/layout.tsx sets it before paint), so both switches,
-// sidebar and mobile header, read it and stay in step. No attribute means the first option, Ledger.
-function subscribe(onChange: () => void) {
-  const observer = new MutationObserver(onChange)
-  observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-preset"] })
-  return () => observer.disconnect()
-}
 
 /** Chooses the docs' preset: data-preset on <html>, remembered in localStorage "preset". Instant, no transition. */
 export function PresetSwitch({ options, className }: { options: Option[]; className?: string }) {
   const fallback = options[0].id
-  const value = useSyncExternalStore(
-    subscribe,
-    () => {
-      const set = document.documentElement.getAttribute("data-preset")
-      return options.some(o => o.id === set) ? set! : fallback
-    },
-    () => fallback,
-  )
+  const value = usePreset(options.map(o => o.id))
 
   function choose(next: string | null) {
     if (!next) return
