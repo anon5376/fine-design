@@ -34,7 +34,7 @@ Install a theme once, then components. A component never re-skins a project.
    "registries": { "@fine": "https://fine-design.qeqx.chatgpt.site/r/{name}.json" }
    ```
 2. Install one theme: `npx shadcn@latest add @fine/theme-ledger` (or `theme-folio`, `theme-poster`). It writes values only (colors, fonts, weights, radii, type scale, control sizes, padding, border width, shadows) to `:root`, `.light`, `.dark` and the OS dark query. A second theme replaces the first; put overrides in a later rule. `fine-theme` is an alias of `theme-ledger`. Tailwind's palette stays.
-3. Add components: `npx shadcn@latest add @fine/button @fine/dialog`. Each depends on `fine-base` (the `@theme inline` mappings, the `figures`, `focus-ring` and `border-line` utilities, keyframes, motion scalars, and Ledger defaults in `@layer base`) plus other items and npm packages. Your `:root` and the installed theme beat those defaults, so adding a component later does not change the look. With no theme installed, components render in Ledger.
+3. Add components: `npx shadcn@latest add @fine/button @fine/dialog`. Each depends on `fine-base` (the `@theme inline` mappings, the `figures`, `figure-fit`, `focus-ring` and `border-line` utilities, keyframes, motion scalars, and Ledger defaults in `@layer base`) plus other items and npm packages. Your `:root` and the installed theme beat those defaults, so adding a component later does not change the look. With no theme installed, components render in Ledger.
 4. After `shadcn init`, add `--overwrite` once: init wrote its own `components/ui/button.tsx` and `lib/utils.ts`, and Fine's versions replace them (icon-button and dialog build on Fine's button API). Fine's `cn` knows the preset utilities, so `h-control-md` and `h-12` merge.
 5. Load the fonts in the theme item's `meta.fonts` with next/font, one CSS variable each, passing an entry's `axes` or `weights` (as `axes` and `weight`) when it lists them: Folio's Newsreader and Poster's Bricolage Grotesque list `opsz`, and load as a static cut without it. Ledger needs Geist as `--font-geist-sans` and `--font-geist-mono`.
 6. App root: `<MotionConfig reducedMotion="user">` and one `<Toaster />`. `TooltipProvider` is optional.
@@ -55,7 +55,7 @@ Read https://fine-design.qeqx.chatgpt.site/llms.txt for the per-item list (descr
 
 **Focus and dark mode.** `focus-visible:focus-ring` on anything focusable. Dark mode is `.dark` or `.light` on `<html>` or any subtree; with neither, the OS decides. `dark:` follows the same rule. Every preset defines both modes.
 
-**Figures.** Money, counts, IDs and addresses take the `figures` utility (the preset's figure face with tabular digits).
+**Figures.** Money, counts, IDs and addresses take the `figures` utility (the preset's figure face with tabular digits). A stat figure in a card also takes `figure-fit`, inside a parent that is `@container` and sets the size (`text-xl`): the figure keeps that size when it fits and shrinks when the card or the face is too narrow. Set `--figure-chars` on the grid to the longest figure's length (default 12).
 
 **Accent.** `accent` marks emphasis on data. How many a screen carries is the preset's call. Ledger allows one, on the main data element, never on chrome. Every preset keeps its accent (and a chromatic primary) 40 degrees or more of hue from `danger`, so an accent never reads as an error.
 

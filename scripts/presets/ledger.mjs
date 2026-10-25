@@ -68,6 +68,9 @@ export default {
     heading: "var(--font-sans)",
     figure: "var(--font-mono)",
   },
+  // Widest digit or money glyph ($ , . + −) of the figure face, in em. `figure-fit` sizes a stat from it, and
+  // tests/layout.spec.ts fails a value below what the face measures.
+  figureAdvance: 0.6,
 
   // ---------------------------------------------------------------- weights
   // label: buttons, control and field labels, tabs, table heads. title: Heading and in-flow titles.

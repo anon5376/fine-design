@@ -69,7 +69,8 @@ const SIZES = ["sm", "md", "lg"]
 function validate(file, p, semanticKeys) {
   const fail = what => { throw new Error(`preset ${file}: ${what}`) }
   if (p.name !== file) fail(`name "${p.name}" must match the file name`)
-  for (const key of ["palette", "semantic", "fonts", "weights", "text", "radius", "borderWidth", "control", "padding", "shadows"]) if (!(key in p)) fail(`missing "${key}"`)
+  for (const key of ["palette", "semantic", "fonts", "figureAdvance", "weights", "text", "radius", "borderWidth", "control", "padding", "shadows"]) if (!(key in p)) fail(`missing "${key}"`)
+  if (!(p.figureAdvance > 0 && p.figureAdvance < 2)) fail("figureAdvance must be a number of em between 0 and 2")
   for (const k of ["sans", "mono", "heading", "figure"]) if (!p.fonts[k]) fail(`fonts.${k} missing`)
   for (const k of WEIGHTS) if (!p.weights[k]) fail(`weights.${k} missing`)
   for (const k of RADII) if (!p.radius[k]) fail(`radius.${k} missing`)
@@ -251,6 +252,7 @@ const PADDINGS = ["control", "field", "container"]
 // The heading font is --font-display, not --font-heading: shadcn init writes `--font-heading: var(--font-sans)` into the project, and the CLI keeps existing theme keys.
 const shapeEntries = p => [
   ["font-sans", p.fonts.sans], ["font-mono", p.fonts.mono], ["font-display", p.fonts.heading], ["font-figure", p.fonts.figure],
+  ["figure-advance", p.figureAdvance],
   ...WEIGHTS.map(k => [`weight-${k}`, p.weights[k]]),
   ...RADII.map(k => [`radius-${k}`, p.radius[k]]),
   ...textEntries(p),
@@ -365,6 +367,13 @@ ${SHADOWS.map(k => (MODE_SHADOWS.includes(k) ? themeMap(`shadow-${k}`, `shadow-$
 @utility figures {
   font-family: var(--font-figure);
   font-variant-numeric: tabular-nums;
+}
+
+/* A figure that cannot outgrow its box. Put it in a parent that is \`@container\` and sets the size (a text-* class): the
+   figure takes that size, or less when --figure-chars glyphs of the figure face (--figure-advance em each) would be wider
+   than the parent. A wide face or a narrow card shrinks the figure instead of pushing it out. */
+@utility figure-fit {
+  font-size: min(1em, calc(100cqi / (var(--figure-chars, 12) * var(--figure-advance, 0.7))));
 }
 
 @utility focus-ring {

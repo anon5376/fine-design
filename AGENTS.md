@@ -41,7 +41,7 @@ npx shadcn@latest add <origin>/r/theme-<preset>.json     # once: ledger, folio o
 npx shadcn@latest add <origin>/r/<name>.json             # any number of times
 ```
 
-- Every ui, block and lib item depends on `fine-base`: the `@theme inline` mappings, the `figures`, `focus-ring` and `border-line` utilities, keyframes, motion scalars, and Ledger's value for every token placed in `@layer base`. Your own `:root` and an installed theme are unlayered, so they win wherever they sit in the file. A component installed alone renders in Ledger.
+- Every ui, block and lib item depends on `fine-base`: the `@theme inline` mappings, the `figures`, `figure-fit`, `focus-ring` and `border-line` utilities, keyframes, motion scalars, and Ledger's value for every token placed in `@layer base`. Your own `:root` and an installed theme are unlayered, so they win wherever they sit in the file. A component installed alone renders in Ledger.
 - A theme (`theme-ledger`, `theme-folio`, `theme-poster`) holds values only and depends on nothing. It writes colors, fonts, weights, radii, type scale, control sizes, padding, border width and shadows to `:root`, `.light`, `.dark` and the OS dark query. Installing a second theme replaces the first. Keep overrides in a later rule.
 - `fine-theme` is an alias of `theme-ledger`, so older install lines still work.
 - Load the fonts listed in the theme item's `meta.fonts` with next/font, one CSS variable each. Pass an entry's `axes` or `weights` (as `axes` and `weight`) when it lists them: Folio's Newsreader and Poster's Bricolage Grotesque list `opsz`, without which they load as a static cut. Ledger needs Geist as `--font-geist-sans` and `--font-geist-mono`; fallbacks are system fonts.
@@ -65,6 +65,7 @@ Utilities map to semantic variables; never raw hex, never palette steps. The nam
 - Status: `success`, `warning`, `danger`, `info`, each with `-foreground`, `-subtle`, `-subtle-foreground`.
 - `accent` marks emphasis on data. How many accents a screen carries is the preset's call; Ledger allows one. An accent never reads as danger: the token build fails a preset whose accent, or chromatic primary, is within 40 degrees of `danger` in hue.
 - `figures` utility (the `--font-figure` face, tabular digits) on money, counts, IDs and addresses.
+- `figure-fit` on a stat figure in a card: put it in a parent that is `@container` and sets the size (`text-xl`), and the figure keeps that size when it fits and shrinks when the card or the face is too narrow, so no preset or width pushes it out. It reserves `--figure-chars` glyphs (default 12; set it on the grid to the longest figure, as dashboard-shell does) of `--figure-advance` em each.
 - `focus-visible:focus-ring`: a 2px outline in the ring color.
 
 The preset contract. Utilities and variables are fixed; a preset supplies the values in `scripts/presets/<name>.mjs`.
@@ -74,6 +75,7 @@ The preset contract. Utilities and variables are fixed; a preset supplies the va
 | Fonts | `--font-sans`, `--font-mono`, `--font-display`, `--font-figure` | `font-sans`, `font-mono`, `font-display`, `figures` | body and UI, code, Heading and card, dialog and drawer titles (named display because shadcn init already maps font-heading to the sans), figures |
 | Weights | `--weight-label`, `--weight-title`, `--weight-strong` | `font-label`, `font-title`, `font-strong` | controls and labels; in-flow titles; container titles and wordmarks |
 | Radii | `--radius-control`, `--radius-container`, `--radius-small`, `--radius-pill` | `rounded-control`, `rounded-container`, `rounded-small`, `rounded-pill` | controls; cards and popups; checkbox, kbd, tag-remove; badges and tracks |
+| Figure width | `--figure-advance` | `figure-fit` | the widest digit or money glyph of the figure face, in em; sizes a stat figure so it fits its card |
 | Type scale | `--text-<2xs..6xl>` with `--line-height` and, from 2xl, `--letter-spacing` | `text-<size>` | all text |
 | Control size | `--control-sm`, `--control-md`, `--control-lg` | `h-control-*`, `size-control-*`, `min-w-control-*` | button, input, select, combobox heights |
 | Padding | `--pad-control-*`, `--pad-field-*`, `--pad-container-*` | `px-pad-control-*`, `px-pad-field-*`, `p-pad-container-*` | button; input, select, combobox, textarea; alert and popover (sm), card (md), dialog and drawer (lg) |
@@ -166,10 +168,10 @@ components/ui/*.tsx      one file per component; installs to the same path
 components/blocks/*.tsx  compositions of components/ui only
 lib/                     utils (cn) · popup · fluid-hover · motion (generated)
 styles/                  fine.css (Ledger and the Tailwind mapping), presets/<name>.css, presets.css, tokens.json (all generated)
-scripts/                 tokens.mjs · presets/<name>.mjs (one per preset) · registry.mjs · verify-install.mts · check-snippets.mts · check-classes.mts · serve.mjs · screenshots.mts · motion-tour.mts
+scripts/                 tokens.mjs · presets/<name>.mjs (one per preset) · registry.mjs · verify-install.mts · check-snippets.mts · check-classes.mts · serve.mjs · screenshots.mts · motion-tour.mts · launch-assets.mts
 site/                    docs-only: nav.ts, examples/<slug>.tsx, presets.ts (fonts per preset), preset-switch.tsx, source.ts, install-command.tsx, chrome
 app/                     docs routes: /, /tokens, /components/[slug], /blocks/[slug]
-tests/                   keyboard, motion, a11y specs against out/
+tests/                   keyboard, motion, a11y, layout specs against out/
 plugin/, .claude-plugin/ Claude Code plugin (skills/fine-design/SKILL.md, .mcp.json) and its marketplace.json; the skill restates AGENTS.md's using rules, so edit both
 registry.json, public/r/*, public/llms.txt   generated by registry:build
 ```
@@ -195,7 +197,7 @@ The accent/danger gate sits next to the contrast gate (`HUE_GATE` in `tokens.mjs
 
 ### Making a preset
 
-1. Copy `scripts/presets/ledger.mjs` to `scripts/presets/<name>.mjs`. `name` must equal the file name and every key is required: palette, semantic (light and dark), fonts, weights, text, radius, borderWidth, control, padding, shadows (`raised`, `control` and `overlay` among them). `fontOptions` is optional. Edit it in the section order the file follows.
+1. Copy `scripts/presets/ledger.mjs` to `scripts/presets/<name>.mjs`. `name` must equal the file name and every key is required: palette, semantic (light and dark), fonts, figureAdvance, weights, text, radius, borderWidth, control, padding, shadows (`raised`, `control` and `overlay` among them). `fontOptions` is optional. `figureAdvance` is what the figure face measures (a digit, in em); `tests/layout.spec.ts` fails a value below it, and fails any preset whose figures leave their card. Edit it in the section order the file follows.
 2. Fonts: write each non-contract family as `var(--font-<id>, "<Family>")` with a quoted fallback. Add a `next/font/google` loader with `variable: "--font-<id>"` and `preload: false` to the preset's section in `site/presets.ts`, list it in the preset's `fonts`, and add the preset to `presets`. If a face needs an `axes` or a fixed `weights` list to load properly, declare it in the preset's `fontOptions` under its variable and pass the same `axes` or `weight` in the loader; theme `meta.fonts` carries it to installed projects, and `npm run registry:build` throws when a preset reads a font variable with no loader or a loader whose options differ.
 3. `npm run tokens`. Every pair in `PAIRS` must pass in light and dark: text 4.5:1, input and ring borders 3:1, accent 3:1 on background and surface, and the accent and a chromatic primary 40 degrees or more from danger in hue. Fix the values, never the gate.
 4. `npm run build` derives `theme-<name>`; `npm run verify:install` proves it installs and renders. Look at the pages in the new preset with `node scripts/screenshots.mts`.
@@ -231,12 +233,13 @@ Match the file you are editing; comments are sparse and say why.
 | `npm run check:snippets` | Every copyable docs snippet compiles as its own file |
 | `npm run check:classes` | No class in `components/`, `site/` or `app/` bypasses the token contract: bare `border` widths, `font-medium`, `font-semibold`, `font-bold`, `rounded` and `rounded-xs` to `rounded-3xl`, and `h-7`, `h-9`, `h-10` in `components/`. Exceptions live in the script's allow-list, each with a reason |
 | `npm run build` | tokens, registry (58 items) and the static export in `out/` |
-| `npm test` | 224 tests: keyboard paths, per-frame motion, axe, against `out/` on port 4329 (build first) |
+| `npm test` | 233 tests: keyboard paths, per-frame motion, axe, figures inside their cards at every width under every preset, against `out/` on port 4329 (build first) |
 | `npm run verify` | build, typecheck, classes, snippets, Playwright in one go |
 | `npm run verify:install` | `theme-folio`, then select and dialog, install into a fresh Next app and render with Folio's tokens and motion while the app's own `:root` values survive; a second phase installs `fine-base` alone and checks the Ledger defaults give way to the project in every color mode; needs network and a prior build (temp app path is printed); after a deploy built with `REGISTRY_URL=https://…`, it installs from the live registry instead |
 | `node scripts/screenshots.mts [states]` | Pages at 375 and 1440, light and dark, for a visual look |
 | `node scripts/motion-tour.mts` | Motion video tour (needs ffmpeg) |
 | `node scripts/showcase-video.mts` | Promo reel of `/showcase` (unlisted payments app), 1920x1080 at 60fps → `screenshots/x/` (build first; needs ffmpeg) |
+| `node scripts/launch-assets.mts gif\|themes\|preview\|icon\|all [--out dir]` | The README and listing assets: `docs/demo.gif` (first 9.9s of the film, 720px, 14fps), `docs/themes.png` and `docs/social-preview.png` (the showcase in all three presets at 1200px, 2x), `plugin/.claude-plugin/icon.png`; serves `out/` itself (build first; needs ffmpeg, and `fine-film.mp4` for the gif) |
 | `node scripts/render-film.mts [--from s --to s --out f.mp4 \| --stills t1,t2]` | Launch film of `/film` (`site/film/`), rendered on a virtual clock so every frame is exact and repeatable; 1920x1080 at 60fps → `screenshots/x/fine-film.mp4` (build first; needs ffmpeg) |
 
 A registry change is proven by `npm run verify:install` (fresh Next app, `shadcn init`, `add --overwrite`, build, browser checks) plus a look at `screenshots/install/`; the registry JSON alone proves nothing. Specs wait on `html[data-hydrated]`; a new interactive page keeps that signal.

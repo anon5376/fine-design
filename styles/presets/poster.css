@@ -73,6 +73,7 @@
   --font-mono: var(--font-martian-mono, "Martian Mono"), ui-monospace, SFMono-Regular, monospace;
   --font-display: var(--font-bricolage, "Bricolage Grotesque"), var(--font-sans);
   --font-figure: var(--font-mono);
+  --figure-advance: 0.7;
   --weight-label: 600;
   --weight-title: 700;
   --weight-strong: 800;

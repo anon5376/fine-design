@@ -1,6 +1,6 @@
 "use client"
 
-import { Fragment, useState, type ReactNode } from "react"
+import { Fragment, useState, type CSSProperties, type ReactNode } from "react"
 import { ArrowLeftRight, FileText, LayoutGrid, Menu, Plus, Settings, Users, Wallet } from "lucide-react"
 import { Avatar } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -70,6 +70,8 @@ const metrics = [
   { label: "Received this month", value: "$112,905.18" },
   { label: "Pending", value: "$3,200.00" },
 ]
+// The longest figure sets one size for the row, so the cards match and none outgrows its card.
+const figureChars = Math.max(...metrics.map(m => m.value.length))
 
 const transfers = [
   { id: "tx_8f21", to: "Northwind Ltd", status: "Settled", amount: "$12,480.00" },
@@ -116,11 +118,13 @@ function Overview() {
 
   return (
     <>
-    <Grid gap="md" className="grid-cols-1 @lg:grid-cols-2 @7xl:grid-cols-4">
+    <Grid gap="md" className="grid-cols-1 @lg:grid-cols-2 @7xl:grid-cols-4" style={{ "--figure-chars": figureChars } as CSSProperties}>
       {metrics.map(metric => (
         <Card key={metric.label} className="gap-1">
           <Text variant="muted">{metric.label}</Text>
-          <Text className={cn("figures text-xl font-title", "main" in metric && "text-accent")}>{metric.value}</Text>
+          <Text className="@container flex text-xl font-title">
+            <span className={cn("figures figure-fit", "main" in metric && "text-accent")}>{metric.value}</span>
+          </Text>
         </Card>
       ))}
     </Grid>

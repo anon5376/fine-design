@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, type CSSProperties } from "react"
 import { ArrowLeftRight, Menu, Plus, RefreshCw, Search, SlidersHorizontal } from "lucide-react"
 import { AnimatedNumber } from "@/components/ui/animated-number"
 import { Avatar } from "@/components/ui/avatar"
@@ -92,6 +92,8 @@ export function Showcase() {
     { label: "Sent this month", value: sent },
     { label: "Received this month", value: received },
   ]
+  // The longest figure sets one size for the row, so the cards match and none outgrows its card.
+  const figureChars = Math.max(...metrics.map(m => money(m.value).length))
 
   return (
     <div data-showcase className="fixed inset-0 z-(--z-sticky) flex flex-col bg-background text-foreground">
@@ -162,7 +164,7 @@ export function Showcase() {
                 New transfer
               </Button>
             </Stack>
-            <Grid gap="md" className="grid-cols-1 @2xl:grid-cols-3">
+            <Grid gap="md" className="grid-cols-1 @2xl:grid-cols-3" style={{ "--figure-chars": figureChars } as CSSProperties}>
               {metrics.map(metric => (
                 <Card key={metric.label} className="relative gap-1">
                   <Text variant="muted">{metric.label}</Text>
@@ -171,7 +173,9 @@ export function Showcase() {
                       <RefreshCw />
                     </IconButton>
                   )}
-                  <AnimatedNumber value={metric.value} format={usd} className={cn("text-2xl font-title", metric.main && "text-accent")} />
+                  <Text render={<div />} className="@container flex text-2xl font-title">
+                    <AnimatedNumber value={metric.value} format={usd} className={cn("figure-fit", metric.main && "text-accent")} />
+                  </Text>
                 </Card>
               ))}
             </Grid>

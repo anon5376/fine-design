@@ -74,6 +74,7 @@
   --font-mono: var(--font-geist-mono, "Geist Mono"), ui-monospace, SFMono-Regular, monospace;
   --font-display: var(--font-sans);
   --font-figure: var(--font-mono);
+  --figure-advance: 0.6;
   --weight-label: 500;
   --weight-title: 500;
   --weight-strong: 600;
@@ -461,6 +462,13 @@
 @utility figures {
   font-family: var(--font-figure);
   font-variant-numeric: tabular-nums;
+}
+
+/* A figure that cannot outgrow its box. Put it in a parent that is `@container` and sets the size (a text-* class): the
+   figure takes that size, or less when --figure-chars glyphs of the figure face (--figure-advance em each) would be wider
+   than the parent. A wide face or a narrow card shrinks the figure instead of pushing it out. */
+@utility figure-fit {
+  font-size: min(1em, calc(100cqi / (var(--figure-chars, 12) * var(--figure-advance, 0.7))));
 }
 
 @utility focus-ring {

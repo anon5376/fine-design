@@ -83,6 +83,10 @@ export default {
   // opsz lets Bricolage switch to its condensed, high-contrast display cut at poster sizes.
   fontOptions: { "--font-bricolage": { axes: ["opsz"] } },
 
+  // Widest digit or money glyph ($ , . + −) of the figure face, in em. `figure-fit` sizes a stat from it, and
+  // tests/layout.spec.ts fails a value below what the face measures.
+  figureAdvance: 0.7,
+
   // ---------------------------------------------------------------- weights
   // label: buttons, control and field labels, tabs, table heads. title: Heading and in-flow titles.
   // strong: container titles (card, dialog, drawer) and the wordmark.

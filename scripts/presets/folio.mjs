@@ -78,6 +78,10 @@ export default {
   // opsz lets the browser pick Newsreader's display cut at large sizes.
   fontOptions: { "--font-newsreader": { axes: ["opsz"] } },
 
+  // Widest digit or money glyph ($ , . + −) of the figure face, in em. `figure-fit` sizes a stat from it, and
+  // tests/layout.spec.ts fails a value below what the face measures.
+  figureAdvance: 0.5,
+
   // ---------------------------------------------------------------- weights
   // Serif titles stay light; the hierarchy comes from size and the face, not from weight.
   weights: { label: 500, title: 400, strong: 500 },

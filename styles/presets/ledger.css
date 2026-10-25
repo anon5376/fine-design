@@ -62,6 +62,7 @@
   --font-mono: var(--font-geist-mono, "Geist Mono"), ui-monospace, SFMono-Regular, monospace;
   --font-display: var(--font-sans);
   --font-figure: var(--font-mono);
+  --figure-advance: 0.6;
   --weight-label: 500;
   --weight-title: 500;
   --weight-strong: 600;

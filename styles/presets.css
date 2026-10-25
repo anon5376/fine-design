@@ -74,6 +74,7 @@
   --font-mono: var(--font-spline-sans-mono, "Spline Sans Mono"), ui-monospace, SFMono-Regular, monospace;
   --font-display: var(--font-newsreader, "Newsreader"), ui-serif, Georgia, serif;
   --font-figure: var(--font-sans);
+  --figure-advance: 0.5;
   --weight-label: 500;
   --weight-title: 400;
   --weight-strong: 500;
@@ -435,6 +436,7 @@
   --font-mono: var(--font-martian-mono, "Martian Mono"), ui-monospace, SFMono-Regular, monospace;
   --font-display: var(--font-bricolage, "Bricolage Grotesque"), var(--font-sans);
   --font-figure: var(--font-mono);
+  --figure-advance: 0.7;
   --weight-label: 600;
   --weight-title: 700;
   --weight-strong: 800;
