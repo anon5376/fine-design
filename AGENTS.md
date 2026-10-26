@@ -1,6 +1,6 @@
 # Fine
 
-React design system: Base UI primitives, Tailwind v4 tokens, Motion springs, shipped as a shadcn registry. 42 components, 7 blocks, 4 lib files, 1 base item and 4 theme items (58 registry items).
+React design system: Base UI primitives, Tailwind v4 tokens, Motion springs, shipped as a shadcn registry. 52 components, 7 blocks, 4 lib files, 1 base item and 4 theme items (68 registry items).
 
 Behavior and appearance are separate. Behavior is the same in every project: Base UI roles, keyboard and focus, validation, reduced motion, the motion tiers, the accessibility contracts, and styling through tokens only. Appearance is a preset: Ledger, Folio or Poster, each a set of token values. The docs site switches between them with `data-preset` on `<html>`.
 
@@ -116,6 +116,16 @@ Write what the user needs to act: the label, the value, the action. A form shows
 | Site or app navigation | Navbar, Sidebar, Breadcrumb, Pagination | Tabs |
 | Form with validation | Form, Field, FieldLabel, FieldError | bare Input |
 | Rule or format for an input (password length, date pattern) | FieldDescription inside Field | Placeholder text, Tooltip |
+| Copy a link, key or ID | CopyButton | IconButton with your own clipboard code |
+| Delete or discard one item without a modal | ConfirmButton | Dialog (keep Dialog for a decision with several fields or consequences) |
+| Autosave, sync or background work: saving, saved, failed | AsyncStatus | Toast, a hand-made spinner |
+| Verification code, 2FA or PIN | OtpInput | One Input per digit |
+| Password entry | PasswordInput | Input with `type="password"` |
+| Progress through a multi-step flow | Stepper | Tabs, Progress |
+| Todo or setup steps being completed | Checklist | Loose Checkboxes |
+| Like, star, bookmark or upvote with a count | ReactionButton | Button plus AnimatedNumber by hand |
+| Unread count on a bell | NotificationBell | IconButton with a Badge |
+| Content whose height changes (steps in a Dialog or Drawer, expanding forms) | AutoHeight | Animating `height` by hand |
 
 Blocks (`components/blocks`) compose `components/ui` only; install one to start from, then edit it.
 
@@ -141,7 +151,7 @@ Alert, Badge, Navbar wordmark, a Tag outside a `TagList`, Slider drag and keyboa
 
 ### Fine's own animations
 
-Original to Fine, not borrowed from a source. Each animates only the change the user needs to notice, on the tiers above, with no loops and no entrance on page load.
+Each animates only the change the user needs to notice, on the tiers above, with no loops and no entrance on page load (the one loop is the Spinner while work is pending). The first five are original to Fine. The ten from 0.4 take their ideas from Rare UI; the code is written from scratch on Fine's primitives and tiers.
 
 | Animation | Where | Moves | Tier | Reduced motion |
 |---|---|---|---|---|
@@ -150,13 +160,24 @@ Original to Fine, not borrowed from a source. Each animates only the change the 
 | Slider track press | `Slider` | Thumb and range glide to the pressed spot; drag and keys stay instant | moderate (CSS, `data-glide`) | jump |
 | Avatar image arrives | `Avatar` | Image fades in over the initials; a cached image shows at once | fast, `ease-enter` | fade kept |
 | Theme switch | docs `ThemeToggle` | Page crossfades through a View Transition (`::view-transition-*(root)` in `app/globals.css`) | moderate | instant switch |
+| Copy confirmation | `CopyButton` | Copy icon fades and scales to 0.5; a check enters at 0.5 to 1 while its stroke draws; reverts after `timeout`. A failed write shows a danger X | fast enter and exit; stroke draw moderate | crossfade, no scale or draw |
+| Async status | `AsyncStatus` | Spinner, check (drawn) and danger X crossfade; the label rolls up a line to the new text | moderate; label on `spring.moderate`, exit on the moderate tween | label and icon crossfade, no travel or draw |
+| Height glide | `AutoHeight` | Container height follows its content (CSS, first measure does not animate). With `transitionKey` the old view leaves inert and out of flow, the new one fades in | moderate glide; fast exit; moderate enter | height jumps, crossfade kept |
+| Inline confirm | `ConfirmButton` | Danger button widens to the question with Cancel and Confirm, then collapses; the two faces crossfade, and both hug the end edge so Confirm lands where the trigger was | width `spring.moderate` and moderate exit; leaving face fast exit, arriving face moderate | width jumps, fades kept |
+| Reaction press | `ReactionButton` | Icon fill fades in and the icon settles from 0.85 to 1; the count rolls | fast fill and press (`spring.fast`); count moderate | no scale; fill and count fade |
+| Bell swing | `NotificationBell` | When `count` rises the bell swings once from its top pivot (about 12 degrees each way); a rise mid-swing carries on; the badge pops from scale 0; the count rolls. A fall never swings | expressive swing; fast badge; moderate count | no swing or pop; badge and count fade |
+| Password reveal and meter | `PasswordInput` | Eye and eye-off swap with scale; meter segments fill left to right with a 40ms stagger in one status color per level | fast swap; moderate fill, moderate exit with no stagger | icons crossfade; segments fade in at full width, no stagger; color fade kept |
+| Code slots | `OtpInput` | A typed digit rolls up into its slot, a deleted one rolls out downward; one ring slides between slots; `invalid` shakes the row (x 0, -6, 5, -3, 0); `state="success"` turns the borders success left to right, 40ms apart | moderate roll and slide; shake is a 240ms tween (slow tier's duration); fast border color | no roll, slide or shake; digit fades; color changes kept |
+| Strike and glide | `Checklist` | After the check mark, a strike line draws across the label left to right and the label goes muted. With `moveCompletedToEnd` the item then glides to the end (the DOM is reordered) | fast mark, moderate strike (80ms delay), moderate retract; glide `spring.moderate` | strike appears at once, glide is a jump; color fade kept |
+| Step progress | `Stepper` | A completed step's marker becomes a check that draws; the connector fills from its start edge (scaleX, scaleY when vertical); the current ring travels to the next marker | fast check; moderate connector and ring (`spring.moderate`) | check, fill and ring jump; marker fades kept |
 
-Screen readers get the final value or name on the same frame: `AnimatedNumber` keeps an sr-only copy of the formatted value and aria-hides the rolling glyphs; the leaving tag is `inert`; the avatar name moves to the image at once.
+Screen readers get the final value or name on the same frame: `AnimatedNumber` keeps an sr-only copy of the formatted value and aria-hides the rolling glyphs; the leaving tag is `inert`; the avatar name moves to the image at once. The new components follow the same rule: `CopyButton` and `NotificationBell` flip their accessible name in the commit that changes the state and add a polite live region; `AsyncStatus` is a polite `role="status"` whose sr-only copy holds the new text while the rolling copy is aria-hidden; `ReactionButton` renames itself ("Like, 12" to "Like, 13") on the frame of the press; the view `AutoHeight` is replacing is `inert`.
 
 ### Accessibility contracts
 
 - Base UI supplies roles, keyboard and focus management; keep its parts, do not re-implement them. Tests pin: dialog traps focus and returns it on Escape; menu arrows and highlight; tabs arrows, Home, End; combobox label focuses input; a Field hint resolves through the input's `aria-describedby`; drawer, command palette, accordion, pagination, navbar-at-375px keyboard paths (`tests/keyboard.spec.ts`).
 - Icon-only controls take `label` (IconButton). Danger Alert uses `role="alert"`, the rest `role="status"`.
+- The ten 0.4 components pin their paths in `tests/anim-feedback.spec.ts`, `anim-actions.spec.ts`, `anim-forms.spec.ts` and `anim-progress.spec.ts`, each with its pages in the axe scans. `CopyButton`: the name flips to "Copied" or "Copy failed" with the icon. `ConfirmButton`: focus moves to Cancel on open; Cancel, Escape and a finished confirm return it to the trigger; the question is a labelled group and the hidden face is inert; Confirm shows `loading` while `onConfirm` is pending. `ReactionButton`: an `aria-pressed` toggle named "Label, count". `NotificationBell`: "Notifications, 3 unread", 99+ above 99. `PasswordInput`: the toggle is named "Show password" or "Hide password" with `aria-pressed` and flips the input type with them; the strength label is `aria-live="polite"` and merged into the input's `aria-describedby`, beside a `FieldDescription`. `OtpInput`: one real `autoComplete="one-time-code"` input drives aria-hidden slots, works with `FieldLabel`, takes digits only, fills every slot on paste (also "123-456"), and calls `onComplete` once per new full code. `Checklist`: built on Checkbox, Space toggles, focus stays on an item that moves, and the DOM order matches the visual order. `Stepper`: an `<ol>`, `aria-current="step"` on the current step, "completed" in the name of finished steps.
 - Every preset meets these: every semantic text pair is at least 4.5:1, input and ring borders at least 3:1 (WCAG 1.4.11), accent at least 3:1 on background and surface, accent and a chromatic primary at least 40 degrees of hue from danger; `npm run tokens` fails otherwise. Axe scans every docs page in both schemes, under the default preset (`tests/a11y.spec.ts`).
 
 ## Changing Fine
@@ -171,7 +192,7 @@ styles/                  fine.css (Ledger and the Tailwind mapping), presets/<na
 scripts/                 tokens.mjs · presets/<name>.mjs (one per preset) · registry.mjs · verify-install.mts · check-snippets.mts · check-classes.mts · serve.mjs · screenshots.mts · motion-tour.mts · launch-assets.mts
 site/                    docs-only: nav.ts, examples/<slug>.tsx, presets.ts (fonts per preset), preset-switch.tsx, source.ts, install-command.tsx, chrome
 app/                     docs routes: /, /tokens, /components/[slug], /blocks/[slug]
-tests/                   keyboard, motion, a11y, layout specs against out/
+tests/                   keyboard, motion, a11y, layout and anim-* (the ten 0.4 components) specs against out/; helpers/motion.ts holds the shared per-frame helpers
 plugin/, .claude-plugin/ Claude Code plugin (skills/fine-design/SKILL.md, .mcp.json) and its marketplace.json; the skill restates AGENTS.md's using rules, so edit both
 registry.json, public/r/*, public/llms.txt   generated by registry:build
 ```
@@ -206,9 +227,10 @@ A preset changes appearance only. It cannot change roles, keyboard paths, valida
 
 ### Motion rules and sources
 
-- Tiers come from Fluid Functionalism (MIT); expressive is Rare UI's SEND spring. easyui's SlidePagination technique drives the pagination indicator. Credits table is in `README.md`. The animations in Fine's own animations above are original, not borrowed; do not credit them.
+- Tiers come from Fluid Functionalism (MIT); expressive is Rare UI's SEND spring. easyui's SlidePagination technique drives the pagination indicator. Credits table is in `README.md`. The first five animations in Fine's own animations above are original, not borrowed; do not credit them. The exception is the ten 0.4 components: each names Rare UI as the source of its idea in its doc comment, the README credits table says so, and no Rare UI code is copied (its license does not clearly cover repackaging code inside a library).
 - Port a source animation onto the nearest tier. Do not invent durations or bounce values in a component. A new original animation is allowed only for a change the user needs to notice; list it in Fine's own animations, state tier and reduced-motion behaviour in its one doc comment, and never block input, delay content or change an accessible name mid-animation.
 - `ease-spring-expressive` is the settle curve of the same underdamped spring Motion runs, generated in `tokens.mjs`.
+- Shared helpers for per-frame cases live in `tests/helpers/motion.ts` (`motionCases`, `record`, `open`); the `tests/anim-*.spec.ts` group specs use them. A per-frame test of a staggered CSS color compares canvas pixels, not serialized colors: Chrome changes a transitioning color's serialization (lab to oklab) at the start of its delay, which reads as a false change. Motion JS springs and WAAPI opacity cannot be slowed with Chrome's animation playback rate, so their cases run at 1x and sample 60 to 160ms; `anim-feedback.spec.ts` sets `retries: 2` for that reason, and a real regression fails every attempt.
 - `tests/motion.spec.ts` samples computed styles per frame to prove each animation uses its token and that movement becomes a jump under reduced motion. Add a case for any new animation.
 
 ### Ledger
@@ -232,8 +254,8 @@ Match the file you are editing; comments are sparse and say why.
 | `npm run typecheck` | The repo compiles |
 | `npm run check:snippets` | Every copyable docs snippet compiles as its own file |
 | `npm run check:classes` | No class in `components/`, `site/` or `app/` bypasses the token contract: bare `border` widths, `font-medium`, `font-semibold`, `font-bold`, `rounded` and `rounded-xs` to `rounded-3xl`, and `h-7`, `h-9`, `h-10` in `components/`. Exceptions live in the script's allow-list, each with a reason |
-| `npm run build` | tokens, registry (58 items) and the static export in `out/` |
-| `npm test` | 233 tests: keyboard paths, per-frame motion, axe, figures inside their cards at every width under every preset, against `out/` on port 4329 (build first) |
+| `npm run build` | tokens, registry (68 items) and the static export in `out/` |
+| `npm test` | 373 tests: keyboard paths, per-frame motion (including the ten 0.4 components in `tests/anim-*.spec.ts`), axe, figures inside their cards at every width under every preset, against `out/` on port 4329 (build first) |
 | `npm run verify` | build, typecheck, classes, snippets, Playwright in one go |
 | `npm run verify:install` | `theme-folio`, then select and dialog, install into a fresh Next app and render with Folio's tokens and motion while the app's own `:root` values survive; a second phase installs `fine-base` alone and checks the Ledger defaults give way to the project in every color mode; needs network and a prior build (temp app path is printed); after a deploy built with `REGISTRY_URL=https://…`, it installs from the live registry instead |
 | `node scripts/screenshots.mts [states]` | Pages at 375 and 1440, light and dark, for a visual look |

@@ -5,7 +5,7 @@ description: Use when building or restyling React UI in a project that uses Fine
 
 # Fine
 
-React design system as a shadcn registry. 42 components, 7 blocks, 4 lib files, `fine-base` and 4 theme items. Site: https://fine-design.qeqx.chatgpt.site
+React design system as a shadcn registry. 52 components, 7 blocks, 4 lib files, `fine-base` and 4 theme items. Site: https://fine-design.qeqx.chatgpt.site
 
 Behavior is universal: Base UI roles, keyboard and focus, validation, reduced motion, the motion tiers, the accessibility contracts, and styling through tokens only. Appearance is a preset: Ledger, Folio or Poster, each a set of token values.
 
@@ -99,6 +99,16 @@ A preset cannot change roles, keyboard paths, validation, motion tiers or the fo
 | Site or app navigation | Navbar, Sidebar, Breadcrumb, Pagination | Tabs |
 | Form with validation | Form, Field, FieldLabel, FieldError | bare Input |
 | Rule or format for an input | FieldDescription inside Field | Placeholder text, Tooltip |
+| Copy a link, key or ID | CopyButton | IconButton with your own clipboard code |
+| Delete or discard one item without a modal | ConfirmButton | Dialog (keep Dialog for several fields or consequences) |
+| Autosave, sync or background work: saving, saved, failed | AsyncStatus | Toast, a hand-made spinner |
+| Verification code, 2FA or PIN | OtpInput | One Input per digit |
+| Password entry | PasswordInput | Input with `type="password"` |
+| Progress through a multi-step flow | Stepper | Tabs, Progress |
+| Todo or setup steps being completed | Checklist | Loose Checkboxes |
+| Like, star, bookmark or upvote with a count | ReactionButton | Button plus AnimatedNumber by hand |
+| Unread count on a bell | NotificationBell | IconButton with a Badge |
+| Content whose height changes (steps in a Dialog or Drawer, expanding forms) | AutoHeight | Animating `height` by hand |
 
 Blocks (`auth-form`, `hero`, `feature-grid`, `pricing`, `faq`, `footer`, `dashboard-shell`) compose `components/ui` only. Install one as a start, then edit it.
 
@@ -118,7 +128,8 @@ Pick the tier by what moves; the bigger the thing, the slower the tier.
 - Motion JS: enter on `spring.<tier>`, exit on `spring.<tier>.exit` with `easing.exit`, both from `@/lib/motion`. CSS: `duration-(--duration-<tier>)` with `ease-spring-<tier>` to enter; `duration-(--duration-<tier>-exit)` with `ease-exit` to leave. Use these tokens in place of invented durations or bounce values.
 - Lists, menus and nav share one hover highlight: `useFluidHover` and `<FluidHighlight>` from `@/lib/fluid-hover`. Popups use `popupSurface`, `popupMotion`, `popupItem` from `@/lib/popup`.
 - Animate transform and opacity. Width moves only where size is the information (progress fill, switch thumb, highlight, a figure gaining a digit, slider position).
-- Fine's own (original): `AnimatedNumber` digit roll (also the pricing price), `TagList` removal exit and sibling glide, `Slider` track-press glide, `Avatar` image fade. Use `AnimatedNumber` for a figure that changes while on screen; wrap removable `Tag`s in `TagList`. Never add loops or page-load entrances.
+- Fine's own (original): `AnimatedNumber` digit roll (also the pricing price), `TagList` removal exit and sibling glide, `Slider` track-press glide, `Avatar` image fade. Use `AnimatedNumber` for a figure that changes while on screen; wrap removable `Tag`s in `TagList`.
+- Ready-made motion for everyday changes, from 0.4. Use these instead of animating by hand: `CopyButton` (drawn check, then reverts), `AsyncStatus` (spinner, check or X, label rolls), `AutoHeight` (height glides; pass `transitionKey` to crossfade swapped views, padding on the children), `ConfirmButton` (widens into the question), `ReactionButton` (fill, press, rolling count), `NotificationBell` (swings once when `count` rises, the one overshoot), `PasswordInput` (reveal swap, strength meter from `strength` 0 to 4 or a `scorer`), `OtpInput` (slots roll, ring slides, `invalid` shakes, `state="success"`), `Checklist` (strike line, `moveCompletedToEnd` glides the item), `Stepper` (check draws, connector fills, ring moves). Each is static on first render and falls back to fades under reduced motion. Never add loops or page-load entrances.
 - Reduced motion drops travel and keeps fades: `MotionConfig reducedMotion="user"` for Motion, `motion-reduce:` for CSS.
 
 ## Accessibility contracts
@@ -127,5 +138,7 @@ Pick the tier by what moves; the bigger the thing, the slower the tier.
 - Combobox goes inside `Field` with a `FieldLabel` before it; the label focuses the input.
 - `FieldDescription` goes between the control and `FieldError`; Base UI links it to the input through `aria-describedby`, so the hint is read with the label.
 - Mount `<Toaster />` once, then call `toast.add({ title, type })` from anywhere.
+- Items that change state keep the accessible name in step with the visuals: `CopyButton`, `ReactionButton` and `NotificationBell` rename themselves in the commit that changes the state, and `AsyncStatus` is a polite `role="status"`. Do not wrap them in your own live region or relabel them mid-animation.
+- `OtpInput` is one real input, so give it a `FieldLabel` inside `Field`; `PasswordInput` takes a `FieldDescription` beside its strength label; `ConfirmButton` moves focus to Cancel on open and back to its trigger on Cancel, Escape or confirm; `Checklist` items need stable keys; `Stepper` marks the current step with `aria-current="step"`.
 - Icon-only controls take `label` (IconButton). Danger Alert uses `role="alert"`, the others `role="status"`.
 - Every preset keeps text pairs at 4.5:1 and input borders at 3:1; take colors from tokens and the contrast holds.
