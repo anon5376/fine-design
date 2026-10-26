@@ -1,4 +1,4 @@
-import type { ReactNode } from "react"
+import type { ComponentType, ReactNode } from "react"
 import { cn } from "@/lib/utils"
 
 /** What the Stage hands every scene. */
@@ -8,6 +8,14 @@ export type SceneProps = {
   /** Scene length in seconds (end - start). */
   duration: number
 }
+
+/**
+ * One entry of a film's cut list. A scene is mounted (and visible) while start - pre <= time < end + post, and receives
+ * t = time - start, so t is negative inside `pre`. Later scenes paint over earlier ones. `pre` lets a scene arrive before
+ * its cut (a whip pan landing); a scene with a `pre` must not paint an opaque background it does not intend to show early.
+ * Cuts sit on 120 BPM beats (multiples of 0.5s) unless the storyboard says otherwise.
+ */
+export type SceneDef = { id: string; name: string; start: number; end: number; pre: number; post: number; Component: ComponentType<SceneProps> }
 
 /**
  * The root of every scene: fills the 1920x1080 stage, clips, and sets the token scheme. fine's tokens follow the

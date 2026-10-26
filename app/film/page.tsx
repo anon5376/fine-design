@@ -1,11 +1,10 @@
 import type { Metadata } from "next"
-import { Film } from "@/site/film/Stage"
+import { Film } from "@/site/film/first-film"
+import { hideChrome } from "@/site/film/hide-chrome"
 
 export const metadata: Metadata = { title: "Film", robots: { index: false, follow: false } }
 
-// Unlisted: not in nav.ts. The stage covers the viewport; the docs chrome (and the Next dev badge) are taken out of the way.
-const hideChrome = `div.mx-auto.grid > :is(aside, header) { display: none } html, body { overflow: hidden; background: var(--gray-950) } nextjs-portal { display: none }`
-
+// Unlisted: not in nav.ts.
 export default function FilmPage() {
   return (
     <>

@@ -1,9 +1,13 @@
-// Deterministic render of /film ("timesnap" style): a virtual clock replaces performance.now, Date.now, rAF and the timers,
-// every Web Animation is paused and positioned from it, and each frame is captured only after React has committed.
+// Deterministic render of a film route ("timesnap" style): a virtual clock replaces performance.now, Date.now, rAF and the
+// timers, every Web Animation is paused and positioned from it, and each frame is captured only after React has committed.
 //   node scripts/render-film.mts                              full film, 60fps capture, encoded 1:1 (crisp, no frame mixing) -> screenshots/x/fine-film.mp4
+//   node scripts/render-film.mts --path /film/v03/            the second film -> screenshots/x/fine-0.3.mp4 (the name follows the route)
 //   node scripts/render-film.mts --from 2 --to 5 --out <dir>/s2.mp4   a partial (same frames the full render would have)
 //   node scripts/render-film.mts --stills 1.0,1.5,1.9 --out <dir>      full-size PNGs at those film times, no video
-// Flags: --fps 60 (capture rate, a multiple of 60; the video is 60fps. 60 = one capture per video frame, crisp, no temporal blur.
+// The length of the film comes from the page ([data-film-duration] on the stage), so --to defaults to the end of whichever film --path names.
+// Flags: --path /film/ (the route to render)
+//        --jump (with --stills: cross the gap to a still in 0.25s steps, then the last second frame by frame; much faster for late times)
+//        --fps 60 (capture rate, a multiple of 60; the video is 60fps. 60 = one capture per video frame, crisp, no temporal blur.
 //        Higher multiples average fps/60 captures per frame into a shutter blur and ghost fast moves: leave it at 60 unless you want that)
 //        --png (lossless frames)
 //        --keep-frames (leave <out>-frames/) --url <base> (a running dev server, e.g. http://localhost:4361) --port 4361
@@ -20,14 +24,14 @@ const opt = (name: string) => {
   const i = args.indexOf(`--${name}`)
   return i >= 0 ? args[i + 1] : undefined
 }
-const DURATION = 23
+const route = `/${(opt("path") ?? "/film/").replace(/^\/+|\/+$/g, "")}/`
+const slug = route.split("/").filter(Boolean).pop()!
+// /film/ -> fine-film, /film/v03/ -> fine-0.3
+const name = slug === "film" ? "fine-film" : `fine-${slug.replace(/^v(\d)(\d+)$/, "$1.$2")}`
 const fps = Number(opt("fps") ?? 60)
 const from = Number(opt("from") ?? 0)
-const to = Number(opt("to") ?? DURATION)
 const stills = opt("stills")?.split(",").map(Number)
 const png = flag("png") || !!stills
-const partial = from !== 0 || to !== DURATION
-const outArg = opt("out") ?? (partial || stills ? join(tmpdir(), "fine-film") : "screenshots/x/fine-film.mp4")
 const port = Number(opt("port") ?? 4361)
 const ffmpeg = "/opt/homebrew/bin/ffmpeg"
 const dt = 1000 / fps
@@ -126,18 +130,29 @@ page.on("console", m => m.type() === "error" && console.error("console:", m.text
 await page.addInitScript(virtualClock)
 const cdp = await page.context().newCDPSession(page)
 
-const outDir = stills ? resolve(outArg) : dirname(resolve(outArg))
-const mp4 = stills ? "" : resolve(outArg.endsWith(".mp4") ? outArg : join(outArg, `film-${from}-${to}.mp4`))
-const frameDir = stills ? outDir : mp4.replace(/\.mp4$/, "-frames")
-rmSync(frameDir, { recursive: !stills, force: true })
-mkdirSync(frameDir, { recursive: true })
-mkdirSync(dirname(mp4 || frameDir), { recursive: true })
-
 try {
-  await page.goto(`${base}/film/?render=1`, { waitUntil: "load" })
+  const res = await page.goto(`${base}${route}?render=1`, { waitUntil: "load" })
+  if (!res?.ok()) throw new Error(`${route} answered ${res?.status()}: is it built (npm run build)?`)
   await page.waitForFunction(() => document.querySelector('[data-film-ready="true"]'), null, { polling: 100, timeout: 60000 })
-  const origin = await page.evaluate(() => (window as any).__film.now())
-  if (origin !== 0) throw new Error(`virtual clock moved before the film started (${origin}ms)`)
+  const stage = await page.evaluate(() => {
+    const el = document.querySelector("[data-film-ready]")!
+    return { duration: Number(el.getAttribute("data-film-duration")), fonts: el.getAttribute("data-film-fonts"), now: (window as any).__film.now() as number }
+  })
+  if (stage.fonts !== "ok") throw new Error(`fonts not loaded before frame 0: ${stage.fonts}`)
+  if (!(stage.duration > 0)) throw new Error(`${route} did not report a duration (data-film-duration)`)
+  if (stage.now !== 0) throw new Error(`virtual clock moved before the film started (${stage.now}ms)`)
+
+  const duration = stage.duration
+  const to = Number(opt("to") ?? duration)
+  if (to > duration) throw new Error(`--to ${to} is past the end of the film (${duration}s)`)
+  const partial = from !== 0 || to !== duration
+  const outArg = opt("out") ?? (partial || stills ? join(tmpdir(), name) : `screenshots/x/${name}.mp4`)
+  const outDir = stills ? resolve(outArg) : dirname(resolve(outArg))
+  const mp4 = stills ? "" : resolve(outArg.endsWith(".mp4") ? outArg : join(outArg, `film-${from}-${to}.mp4`))
+  const frameDir = stills ? outDir : mp4.replace(/\.mp4$/, "-frames")
+  if (!stills) rmSync(frameDir, { recursive: true, force: true })
+  mkdirSync(frameDir, { recursive: true })
+  mkdirSync(dirname(mp4 || frameDir), { recursive: true })
 
   const shot = async (file: string) => {
     await page.evaluate(() => (window as any).__film.paint())
@@ -151,6 +166,10 @@ try {
     let k = 0
     for (const s of stills.sort((a, b) => a - b)) {
       const target = Math.round(s * fps)
+      // --jump: whole 15-frame steps across the gap, the last second at full rate. Scenes are functions of film time; only CSS transitions (at most 0.81s) remember their past.
+      const coarse = flag("jump") && target - k > fps + 15 ? Math.floor((target - k - fps) / 15) : 0
+      if (coarse) await page.evaluate(([n, ms]) => (window as any).__film.skip(n, ms), [coarse, dt * 15])
+      k += coarse * 15
       if (target > k) await page.evaluate(([n, ms]) => (window as any).__film.skip(n, ms), [target - k, dt])
       k = target
       await shot(join(frameDir, `still-${s.toFixed(3)}.png`))

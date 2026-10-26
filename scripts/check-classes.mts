@@ -4,8 +4,8 @@
 import { readdirSync, readFileSync } from "node:fs"
 
 const ROOTS = ["components", "site", "app"]
-// The launch film is its own fixed artwork, not preset-driven chrome.
-const SKIP = ["site/film/", "app/film/"]
+// The launch films are their own fixed artwork, not preset-driven chrome.
+const SKIP = ["site/film/", "site/film03/", "app/film/"]
 
 type Rule = { id: string; match: RegExp; scope?: string; fix: string }
 const RULES: Rule[] = [

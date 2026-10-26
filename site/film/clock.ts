@@ -1,14 +1,14 @@
 "use client"
 
 // The film's clock and motion maths. One number drives everything: film time in seconds.
-//   <Film/> calls useFilmTime() once; scenes get their local time as a prop, never a clock of their own.
+//   <Stage/> calls useFilmTime(duration) once; scenes get their local time as a prop, never a clock of their own.
 // Time comes from performance.now() inside requestAnimationFrame, which scripts/render-film.mts replaces with a
 // virtual clock, so the same code plays in real time for visitors and renders frame-exact to video.
 import { createContext, useContext, useEffect, useState } from "react"
 import { flushSync } from "react-dom"
 import { spring as springGenerator } from "motion"
 
-export const FILM = { width: 1920, height: 1080, duration: 23, bpm: 120, beat: 0.5 } as const
+export const FILM = { width: 1920, height: 1080, bpm: 120, beat: 0.5 } as const
 
 /** Seconds of beat n (120 BPM: every cut lands on a multiple of 0.5). */
 export const beat = (n: number) => n * FILM.beat
@@ -112,17 +112,17 @@ export const FilmTimeProvider = FilmTimeContext.Provider
 export const useFilmClock = () => useContext(FilmTimeContext)
 
 /**
- * Film time in seconds, advanced from requestAnimationFrame and performance.now(). Query parameters:
+ * Film time in seconds (0 to `duration`, which each film sets), advanced from requestAnimationFrame and performance.now(). Query parameters:
  *   ?render=1  no looping (scripts/render-film.mts)    ?from=5.5  start playing at 5.5s    ?t=12.25  freeze on one time
  * Updates flush synchronously, so React has committed this time before the next frame callback runs.
  */
-export function useFilmTime(): number {
+export function useFilmTime(duration: number): number {
   const [time, setTime] = useState(0)
   useEffect(() => {
     const q = new URLSearchParams(location.search)
     const frozen = q.get("t")
     if (frozen !== null) {
-      setTime(Math.min(FILM.duration - 1e-6, Math.max(0, Number(frozen) || 0)))
+      setTime(Math.min(duration - 1e-6, Math.max(0, Number(frozen) || 0)))
       return
     }
     const loop = !q.has("render")
@@ -131,17 +131,17 @@ export function useFilmTime(): number {
     let raf = 0
     const tick = (now: number) => {
       let t = (now - origin) / 1000
-      if (t >= FILM.duration) {
+      if (t >= duration) {
         if (loop) {
-          origin += FILM.duration * 1000
-          t -= FILM.duration
-        } else t = FILM.duration - 1e-6
+          origin += duration * 1000
+          t -= duration
+        } else t = duration - 1e-6
       }
       flushSync(() => setTime(round(Math.max(0, t))))
       raf = requestAnimationFrame(tick)
     }
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
-  }, [])
+  }, [duration])
   return time
 }
