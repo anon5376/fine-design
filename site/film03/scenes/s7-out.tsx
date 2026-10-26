@@ -24,9 +24,10 @@ const HOLD = 1.5 // 23.0
 const STEP: SpringSpec = { visualDuration: 0.24, bounce: 0 }
 const MUTED = "var(--muted-foreground)"
 
-export function S7Out({ t }: SceneProps) {
+/** The closing scene for any version: the first two characters of `version` ("0.") stay muted, the rest are foreground. Film 0.4 passes "0.4". */
+export function OutScene({ t, version = "0.3" }: SceneProps & { version?: string }) {
   const gapUrl = SIZE * 0.26
-  const L = measureLockup(SIZE, "0.3", gapUrl + URL_SIZE * 0.72)
+  const L = measureLockup(SIZE, version, gapUrl + URL_SIZE * 0.72)
   const { word: m, underline: u, figures: f } = L
   const lineY = u.y
 
@@ -37,7 +38,7 @@ export function S7Out({ t }: SceneProps) {
   // The tittle falls in from above once the stem is up, with the same overshoot as the first film's ending.
   const drop = spring(k - 0.3, { visualDuration: 0.5, bounce: 0.38 })
   const dotDy = lerp(-(m.tittle.cy + L.baseline + 80), 0, drop) + lift[1]
-  const layers: FigureLayer[] = [..."0.3"].map((ch, i) => ({
+  const layers: FigureLayer[] = [...version].map((ch, i) => ({
     index: i,
     ch,
     dy: lerp(f.cellH, 0, spring(k - 0.2 - i * 0.05, springs.hero)),
@@ -85,4 +86,8 @@ export function S7Out({ t }: SceneProps) {
       </div>
     </PresetScene>
   )
+}
+
+export function S7Out(props: SceneProps) {
+  return <OutScene {...props} />
 }

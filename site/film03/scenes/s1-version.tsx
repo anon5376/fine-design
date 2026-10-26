@@ -14,28 +14,35 @@ import { PresetScene } from "../preset-scope"
 const W = 1920
 const H = 1080
 const SIZE = 380
-const CHANGE = 0.75
 // The moderate roll slowed to read at film scale (spring 0.16s -> 0.32s), with a hint of overshoot. The exit is the tier's tween (0.12s -> 0.24s).
 const ROLL: SpringSpec = { visualDuration: 0.32, bounce: 0.28 }
 const EXIT = 0.24
-const WIPE = { start: 2.02, dur: 0.42 }
 const MUTED = "var(--muted-foreground)"
 
-export function S1Version({ t }: SceneProps) {
-  const L = measureLockup(SIZE, "0.2")
+/** When the beats of the version scene fall, in scene seconds. The drift runs until the push starts; the wipe finishes before the cut. */
+export type VersionTiming = { change: number; push: { start: number; dur: number }; wipe: { start: number; dur: number } }
+
+/** fine 0.3's timing (2.5 s scene). */
+const DEFAULT_TIMING: VersionTiming = { change: 0.75, push: { start: 1.5, dur: 1 }, wipe: { start: 2.02, dur: 0.42 } }
+
+/**
+ * The scene for any version bump: `from` and `to` have the same length and differ in their last character (the digit that rolls).
+ * Film 0.4 passes its own versions and a shorter timing (site/film04); the defaults are film 0.3's scene, unchanged.
+ */
+export function VersionScene({ t, from = "0.2", to = "0.3", timing = DEFAULT_TIMING }: SceneProps & { from?: string; to?: string; timing?: VersionTiming }) {
+  const { change: CHANGE, push, wipe: WIPE } = timing
+  const last = from.length - 1
+  const L = measureLockup(SIZE, from)
   const { underline: u, figures: f } = L
 
   const out = progress(t, CHANGE, EXIT)
-  const layers: FigureLayer[] = [
-    { index: 0, ch: "0", fill: MUTED },
-    { index: 1, ch: ".", fill: MUTED },
-  ]
-  if (out < 1) layers.push({ index: 2, ch: "2", dy: -ease.exit(out) * f.cellH, opacity: 1 - ease.exit(out), fill: MUTED })
+  const layers: FigureLayer[] = [...from.slice(0, last)].map((ch, index) => ({ index, ch, fill: MUTED }))
+  if (out < 1) layers.push({ index: last, ch: from[last], dy: -ease.exit(out) * f.cellH, opacity: 1 - ease.exit(out), fill: MUTED })
   if (t >= CHANGE) {
     const settle = ease.inOut(progress(t, CHANGE + 0.3, 0.7))
     layers.push({
-      index: 2,
-      ch: "3",
+      index: last,
+      ch: to[last],
       dy: (1 - spring(t - CHANGE, ROLL)) * f.cellH,
       opacity: ease.enter(progress(t, CHANGE, 0.32)),
       fill: `color-mix(in oklch, var(--accent) ${(1 - settle) * 100}%, var(--foreground))`,
@@ -43,7 +50,7 @@ export function S1Version({ t }: SceneProps) {
   }
 
   // A drift so no frame is frozen, then the push-in that lands on the cut.
-  const scale = 1 + 0.015 * progress(t, 0, 1.5) + 0.135 * ease.inOutSoft(progress(t, 1.5, 1))
+  const scale = 1 + 0.015 * progress(t, 0, push.start) + 0.135 * ease.inOutSoft(progress(t, push.start, push.dur))
   const camera = `translate(${W / 2} ${H / 2}) scale(${scale}) translate(${-W / 2} ${-H / 2})`
 
   // The underline is the wipe: it widens to the frame first, then floods up and down, and turns from cobalt to paper (gray-50 is
@@ -73,4 +80,8 @@ export function S1Version({ t }: SceneProps) {
       </svg>
     </PresetScene>
   )
+}
+
+export function S1Version(props: SceneProps) {
+  return <VersionScene {...props} />
 }

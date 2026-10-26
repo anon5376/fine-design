@@ -81,7 +81,7 @@ npm run verify:install   # install theme-folio, select and dialog into a fresh N
 node scripts/screenshots.mts [states]   # every page at 375/1440, light/dark → screenshots/
 node scripts/motion-tour.mts            # motion video tour → screenshots/motion/ (needs ffmpeg)
 node scripts/showcase-video.mts        # 1080p60 promo reel of /showcase → screenshots/x/ (needs ffmpeg)
-node scripts/render-film.mts           # deterministic launch film of /film (virtual clock, 1080p60) → screenshots/x/fine-film.mp4; --path /film/v03/ renders the 0.3 film → fine-0.3.mp4; --from/--to/--stills for partials (build first; needs ffmpeg)
+node scripts/render-film.mts           # deterministic launch film of /film (virtual clock, 1080p60) → screenshots/x/fine-film.mp4; --path /film/v03/ renders the 0.3 film → fine-0.3.mp4, --path /film/v04/ the 0.4 film → fine-0.4.mp4; --from/--to/--stills for partials (build first; needs ffmpeg)
 node scripts/launch-assets.mts all     # README and listing assets: docs/demo.gif, themes.png, social-preview.png, plugin icon; or gif|themes|preview|icon, --out <dir> (build first; needs ffmpeg and the film for the gif)
 ```
 
